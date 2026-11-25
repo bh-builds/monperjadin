@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekap Perjadin - Dynamic Pivot Table</title>
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --border: #dadce0;
+      --bg: #f8f9fa;
+      --header-bg: #eef3fc;
+    }
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg);
+      color: #202124;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px 24px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      color: #1f1f1f;
+    }
+    button.refresh-btn {
+      padding: 6px 14px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button.refresh-btn:hover {
+      background: #1557b0;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    .control-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .control-label {
+      font-weight: 600;
+      font-size: 13px;
+      color: #444;
+    }
+    select, input[type="text"] {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+      background: #fff;
+    }
+    label.tickbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #fff;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      user-select: none;
+    }
+    label.tickbox:hover {
+      border-color: var(--primary);
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      max-height: 72vh;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    th {
+      background-color: var(--header-bg);
+      font-weight: 600;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    thead tr:nth-child(2) th {
+      top: 33px;
+    }
+    th.sticky-col-1, td.sticky-col-1 {
+      position: sticky;
+      left: 0;
+      background: #fff;
+      z-index: 3;
+      text-align: left;
+    }
+    th.sticky-col-1 {
+      background: var(--header-bg);
+      z-index: 4;
+    }
+    td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    tr:hover td {
+      background-color: #f1f6fe;
+    }
+    tr.grand-total-row td {
+      font-weight: 700;
+      background-color: #e8eaed;
+      position: sticky;
+      bottom: 0;
+      z-index: 3;
+    }
+    #status {
+      font-size: 14px;
+      color: #5f6368;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <h2>Rekap Perjalanan Dinas — Pivot Table</h2>
+      <button class="refresh-btn" onclick="fetchSheetData()">Refresh Data</button>
+    </div>
+
+    <div class="controls">
+      <!-- Column Pivot Dimension -->
+      <div class="control-group">
+        <span class="control-label">Group Columns By:</span>
+        <select id="colDimension" onchange="renderPivot()">
+          <option value="helperMonth" selected>Month (HelperMonth)</option>
+          <option value="lokus">Destination (Lokus)</option>
+          <option value="none">None (Summary Only)</option>
+        </select>
+      </div>
+
+      <!-- Tick Boxes for Selecting Columns / Metrics -->
+      <div class="control-group">
+        <span class="control-label">Select Columns:</span>
+        <label class="tickbox"><input type="checkbox" id="chkNip" checked onchange="renderPivot()"> NIP</label>
+        <label class="tickbox"><input type="checkbox" class="metric-chk" value="total" checked onchange="renderPivot()"> Total (Rp)</label>
+        <label class="tickbox"><input type="checkbox" class="metric-chk" value="uh" onchange="renderPivot()"> UH (Rp)</label>
+        <label class="tickbox"><input type="checkbox" class="metric-chk" value="transport" onchange="renderPivot()"> Transport (Rp)</label>
+        <label class="tickbox"><input type="checkbox" class="metric-chk" value="penginapan" onchange="renderPivot()"> Penginapan 30%</label>
+        <label class="tickbox"><input type="checkbox" class="metric-chk" value="durasi" onchange="renderPivot()"> Durasi (Hari)</label>
+        <label class="tickbox"><input type="checkbox" class="metric-chk" value="count" onchange="renderPivot()"> Jumlah Perjadin</label>
+      </div>
+
+      <!-- Participant Search Filter -->
+      <div class="control-group">
+        <span class="control-label">Filter Participant:</span>
+        <input type="text" id="searchInput" placeholder="Search Nama or NIP..." oninput="renderPivot()">
+      </div>
+    </div>
+
+    <div id="status">Loading spreadsheet data...</div>
+    <div class="table-wrapper" id="tableContainer" style="display:none;">
+      <table id="pivotTable"></table>
+    </div>
+  </div>
+
+  <script>
+    // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW
+    const API_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+
+    let rawData = [];
+
+    const METRIC_LABELS = {
+      total: 'Total',
+      uh: 'UH',
+      transport: 'Transport',
+      penginapan: 'Penginapan 30%',
+      durasi: 'Durasi',
+      count: 'Trips'
+    };
+
+    const MONTH_ORDER = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    window.onload = fetchSheetData;
+
+    async function fetchSheetData() {
+      const statusEl = document.getElementById('status');
+      const tableContainer = document.getElementById('tableContainer');
+
+      statusEl.style.display = 'block';
+      statusEl.textContent = 'Loading spreadsheet data...';
+      tableContainer.style.display = 'none';
+
+      try {
+        // Google Apps Script redirects GET requests; default fetch follows redirects cleanly
+        const response = await fetch(API_URL, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+
+        if (!response.ok) {
+          throw new Error('HTTP error ' + response.status);
+        }
+
+        const result = await response.json();
+        if (result.status !== 'success') {
+          throw new Error(result.message || 'Failed to parse data');
+        }
+
+        rawData = result.data;
+        statusEl.style.display = 'none';
+        tableContainer.style.display = 'block';
+        renderPivot();
+      } catch (err) {
+        statusEl.textContent = 'Error loading data: ' + err.message + '. Make sure the Apps Script Web App is deployed with access set to "Anyone".';
+      }
+    }
+
+    function formatNumber(val) {
+      if (!val || val === 0) return '-';
+      return val.toLocaleString('en-US');
+    }
+
+    function renderPivot() {
+      const colDim = document.getElementById('colDimension').value;
+      const showNip = document.getElementById('chkNip').checked;
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      const selectedMetrics = Array.from(document.querySelectorAll('.metric-chk:checked'))
+        .map(cb => cb.value);
+
+      const table = document.getElementById('pivotTable');
+      if (selectedMetrics.length === 0) {
+        table.innerHTML = '<tr><td style="padding:16px;">Please tick at least one column metric above.</td></tr>';
+        return;
+      }
+
+      const filtered = rawData.filter(r =>
+        !search || r.nama.toLowerCase().includes(search) || r.nip.toLowerCase().includes(search)
+      );
+
+      let colKeys = [];
+      if (colDim !== 'none') {
+        const keySet = new Set(filtered.map(r => r[colDim]));
+        colKeys = Array.from(keySet);
+        if (colDim === 'helperMonth') {
+          colKeys.sort((a, b) => {
+            const idxA = MONTH_ORDER.indexOf(a);
+            const idxB = MONTH_ORDER.indexOf(b);
+            if (idxA === -1 && idxB === -1) return a.localeCompare(b);
+            if (idxA === -1) return 1;
+            if (idxB === -1) return -1;
+            return idxA - idxB;
+          });
+        } else {
+          colKeys.sort();
+        }
+      }
+
+      const participantsMap = new Map();
+      filtered.forEach(row => {
+        if (!participantsMap.has(row.nama)) {
+          participantsMap.set(row.nama, {
+            nama: row.nama,
+            nip: row.nip,
+            byCol: {},
+            rowTotals: { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 }
+          });
+        }
+        const p = participantsMap.get(row.nama);
+        if (!p.nip && row.nip) p.nip = row.nip;
+
+        const cKey = colDim === 'none' ? 'ALL' : row[colDim];
+        if (!p.byCol[cKey]) {
+          p.byCol[cKey] = { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 };
+        }
+
+        ['total', 'uh', 'transport', 'penginapan', 'durasi'].forEach(m => {
+          p.byCol[cKey][m] += row[m];
+          p.rowTotals[m] += row[m];
+        });
+        p.byCol[cKey].count += 1;
+        p.rowTotals.count += 1;
+      });
+
+      const participants = Array.from(participantsMap.values())
+        .sort((a, b) => a.nama.localeCompare(b.nama));
+
+      let thead = '<thead><tr>';
+      thead += `<th class="sticky-col-1" rowspan="${colDim === 'none' ? 1 : 2}">Nama</th>`;
+      if (showNip) {
+        thead += `<th rowspan="${colDim === 'none' ? 1 : 2}">NIP</th>`;
+      }
+
+      if (colDim === 'none') {
+        selectedMetrics.forEach(m => {
+          thead += `<th>${METRIC_LABELS[m]}</th>`;
+        });
+      } else {
+        colKeys.forEach(ck => {
+          thead += `<th colspan="${selectedMetrics.length}">${ck}</th>`;
+        });
+        thead += `<th colspan="${selectedMetrics.length}">Grand Total</th>`;
+        thead += '</tr><tr>';
+        colKeys.forEach(() => {
+          selectedMetrics.forEach(m => {
+            thead += `<th>${METRIC_LABELS[m]}</th>`;
+          });
+        });
+        selectedMetrics.forEach(m => {
+          thead += `<th>${METRIC_LABELS[m]}</th>`;
+        });
+      }
+      thead += '</tr></thead>';
+
+      const grandTotalsByCol = {};
+      colKeys.forEach(ck => {
+        grandTotalsByCol[ck] = { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 };
+      });
+      const overallGrandTotal = { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 };
+
+      let tbody = '<tbody>';
+      participants.forEach(p => {
+        tbody += '<tr>';
+        tbody += `<td class="sticky-col-1">${p.nama}</td>`;
+        if (showNip) {
+          tbody += `<td>${p.nip || '-'}</td>`;
+        }
+
+        if (colDim === 'none') {
+          selectedMetrics.forEach(m => {
+            const val = p.rowTotals[m];
+            overallGrandTotal[m] += val;
+            tbody += `<td class="num">${formatNumber(val)}</td>`;
+          });
+        } else {
+          colKeys.forEach(ck => {
+            const cellGroup = p.byCol[ck] || { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 };
+            selectedMetrics.forEach(m => {
+              const val = cellGroup[m];
+              grandTotalsByCol[ck][m] += val;
+              tbody += `<td class="num">${formatNumber(val)}</td>`;
+            });
+          });
+          selectedMetrics.forEach(m => {
+            const val = p.rowTotals[m];
+            overallGrandTotal[m] += val;
+            tbody += `<td class="num" style="font-weight:600;">${formatNumber(val)}</td>`;
+          });
+        }
+        tbody += '</tr>';
+      });
+
+      tbody += '<tr class="grand-total-row">';
+      tbody += `<td class="sticky-col-1">Grand Total (${participants.length} Participants)</td>`;
+      if (showNip) tbody += '<td></td>';
+
+      if (colDim === 'none') {
+        selectedMetrics.forEach(m => {
+          tbody += `<td class="num">${formatNumber(overallGrandTotal[m])}</td>`;
+        });
+      } else {
+        colKeys.forEach(ck => {
+          selectedMetrics.forEach(m => {
+            tbody += `<td class="num">${formatNumber(grandTotalsByCol[ck][m])}</td>`;
+          });
+        });
+        selectedMetrics.forEach(m => {
+          tbody += `<td class="num">${formatNumber(overallGrandTotal[m])}</td>`;
+        });
+      }
+      tbody += '</tr></tbody>';
+
+      table.innerHTML = thead + tbody;
+    }
+  </script>
+</body>
+</html>
