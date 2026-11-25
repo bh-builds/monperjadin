@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Perjadin — Dynamic Pivot Table</title>
+  <title>Rekap Perjadin — Tabel Pivot Dinamis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #00A896;
@@ -92,7 +92,6 @@
     .kpi-badge {
       background: var(--header-bg);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--accent-lime);
       padding: 6px 12px;
       border-radius: 8px;
       font-size: 12px;
@@ -325,13 +324,18 @@
       font-weight: 700;
     }
 
-    /* Sticky First Column */
+    /* Sticky First Column (Nama - reduced width with ellipsis) */
     th.sticky-col-1, td.sticky-col-1 {
       position: sticky;
       left: 0;
       z-index: 3;
       text-align: left;
       border-right: 2px solid #cbd5e1;
+      width: 240px;
+      min-width: 240px;
+      max-width: 240px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     td.sticky-col-1 {
@@ -345,24 +349,46 @@
       z-index: 5;
     }
 
-    /* Clickable Participant Name */
+    /* NIP Column (Monospace & Fit Content) */
+    th.nip-col, td.nip-col {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    td.nip-col {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+      color: #64748b;
+    }
+
+    /* Clickable Participant Name with Ellipsis */
     .participant-link {
       color: var(--primary-hover);
       text-decoration: none;
       cursor: pointer;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 6px;
+      width: 100%;
       font-weight: 600;
       transition: color 0.15s ease;
     }
 
-    .participant-link:hover {
+    .participant-name-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .participant-link:hover .participant-name-text {
       color: var(--primary);
       text-decoration: underline;
     }
 
     .trip-pill {
+      flex-shrink: 0;
       font-size: 11px;
       font-weight: 600;
       background: var(--accent-lime-light);
@@ -498,6 +524,7 @@
       display: inline-block;
       margin-top: 4px;
       font-size: 13px;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       color: var(--text-muted);
     }
 
@@ -576,36 +603,35 @@
     <div class="header-bar">
       <div class="title-group">
         <h2>Rekap Perjalanan Dinas</h2>
-        <p>Click a participant's name to view trip details • Click any column header to sort</p>
+        <p>Klik nama peserta untuk melihat rincian perjalanan • Klik judul kolom untuk mengurutkan</p>
       </div>
       <div class="header-actions">
         <div class="kpi-strip" id="kpiStrip" style="display:none;">
-          <div class="kpi-badge">Participants: <strong id="kpiParticipants">0</strong></div>
-          <div class="kpi-badge">Total Trips: <strong id="kpiTrips">0</strong></div>
-          <div class="kpi-badge">Grand Total: <strong id="kpiTotal">Rp 0</strong></div>
+          <div class="kpi-badge">Peserta: <strong id="kpiParticipants">0</strong></div>
+          <div class="kpi-badge">Total Perjalanan: <strong id="kpiTrips">0</strong></div>
+          <div class="kpi-badge">Total Keseluruhan: <strong id="kpiTotal">Rp 0</strong></div>
         </div>
         <button class="refresh-btn" onclick="fetchSheetData()">
-          <span>↻</span> Refresh Data
+          <span>↻</span> Muat Ulang Data
         </button>
       </div>
     </div>
 
     <div class="controls">
-      <!-- Column Pivot Dimension -->
+      <!-- Dimensi Pengelompokan Kolom -->
       <div class="control-group">
-        <span class="control-label">Group By</span>
+        <span class="control-label">Kelompokkan</span>
         <select id="colDimension" onchange="resetSortAndRender()">
-          <option value="helperMonth" selected>Month (HelperMonth)</option>
-          <option value="lokus">Destination (Lokus)</option>
-          <option value="none">None (Summary Only)</option>
+          <option value="helperMonth" selected>Bulan (HelperMonth)</option>
+          <option value="lokus">Tujuan</option>
+          <option value="none">Tanpa Pengelompokan (Ringkasan)</option>
         </select>
       </div>
 
-      <!-- Tick Boxes for Selecting Columns / Metrics -->
+      <!-- Kotak Centang Pemilihan Kolom Tambahan (Kolom Total selalu aktif) -->
       <div class="control-group">
-        <span class="control-label">Columns</span>
+        <span class="control-label">Kolom</span>
         <label class="tickbox"><input type="checkbox" id="chkNip" checked onchange="renderPivot()"> NIP</label>
-        <label class="tickbox"><input type="checkbox" class="metric-chk" value="total" checked onchange="renderPivot()"> Total (Rp)</label>
         <label class="tickbox"><input type="checkbox" class="metric-chk" value="uh" onchange="renderPivot()"> UH (Rp)</label>
         <label class="tickbox"><input type="checkbox" class="metric-chk" value="transport" onchange="renderPivot()"> Transport (Rp)</label>
         <label class="tickbox"><input type="checkbox" class="metric-chk" value="penginapan" onchange="renderPivot()"> Penginapan 30%</label>
@@ -613,31 +639,31 @@
         <label class="tickbox"><input type="checkbox" class="metric-chk" value="count" onchange="renderPivot()"> Jumlah Perjadin</label>
       </div>
 
-      <!-- Participant Search Filter -->
+      <!-- Pencarian Peserta -->
       <div class="control-group">
         <span class="control-label">Filter</span>
         <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Search Nama or NIP..." oninput="handleSearch()">
-          <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()" title="Clear search">&times;</button>
+          <input type="text" id="searchInput" placeholder="Cari Nama atau NIP..." oninput="handleSearch()">
+          <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()" title="Hapus pencarian">&times;</button>
         </div>
       </div>
     </div>
 
-    <div id="status"><div class="spinner"></div><span>Loading spreadsheet data...</span></div>
+    <div id="status"><div class="spinner"></div><span>Memuat data spreadsheet...</span></div>
     <div class="table-wrapper" id="tableContainer" style="display:none;">
       <table id="pivotTable"></table>
     </div>
   </div>
 
-  <!-- Participant Trip Details Modal -->
+  <!-- Modal Rincian Perjalanan Peserta -->
   <div class="modal-backdrop" id="detailModal" onclick="handleBackdropClick(event)">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalParticipantName">
       <div class="modal-header">
         <div class="modal-title">
-          <h3 id="modalParticipantName">Participant Name</h3>
+          <h3 id="modalParticipantName">Nama Peserta</h3>
           <span id="modalParticipantNip">NIP: -</span>
         </div>
-        <button class="modal-close" onclick="closeDetailModal()" title="Close">&times;</button>
+        <button class="modal-close" onclick="closeDetailModal()" title="Tutup">&times;</button>
       </div>
       <div class="modal-summary" id="modalSummaryStrip"></div>
       <div class="modal-body">
@@ -651,7 +677,7 @@
 
     let rawData = [];
 
-    // Sort state: type can be 'nama', 'nip', 'colMetric', or 'totalMetric'
+    // Status pengurutan: type berupa 'nama', 'nip', 'colMetric', atau 'totalMetric'
     let sortState = {
       type: 'nama',
       colKey: null,
@@ -665,13 +691,35 @@
       transport: 'Transport',
       penginapan: 'Penginapan 30%',
       durasi: 'Durasi',
-      count: 'Trips'
+      count: 'Perjadin'
     };
 
     const MONTH_ORDER = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
+
+    const MONTH_ID_MAP = {
+      January: 'Januari',
+      February: 'Februari',
+      March: 'Maret',
+      April: 'April',
+      May: 'Mei',
+      June: 'Juni',
+      July: 'Juli',
+      August: 'Agustus',
+      September: 'September',
+      October: 'Oktober',
+      November: 'November',
+      December: 'Desember'
+    };
+
+    function formatGroupLabel(dim, key) {
+      if (dim === 'helperMonth' && MONTH_ID_MAP[key]) {
+        return MONTH_ID_MAP[key];
+      }
+      return key;
+    }
 
     window.onload = fetchSheetData;
 
@@ -685,7 +733,7 @@
       const kpiStrip = document.getElementById('kpiStrip');
 
       statusEl.style.display = 'flex';
-      statusEl.innerHTML = '<div class="spinner"></div><span>Loading spreadsheet data...</span>';
+      statusEl.innerHTML = '<div class="spinner"></div><span>Memuat data spreadsheet...</span>';
       tableContainer.style.display = 'none';
       kpiStrip.style.display = 'none';
 
@@ -696,12 +744,12 @@
         });
 
         if (!response.ok) {
-          throw new Error('HTTP error ' + response.status);
+          throw new Error('Kesalahan HTTP ' + response.status);
         }
 
         const result = await response.json();
         if (result.status !== 'success') {
-          throw new Error(result.message || 'Failed to parse data');
+          throw new Error(result.message || 'Gagal memproses data');
         }
 
         rawData = result.data;
@@ -710,7 +758,7 @@
         kpiStrip.style.display = 'flex';
         renderPivot();
       } catch (err) {
-        statusEl.innerHTML = `<span style="color:#dc2626;">Error loading data: ${err.message}. Make sure the Apps Script Web App is deployed with access set to "Anyone".</span>`;
+        statusEl.innerHTML = `<span style="color:#dc2626;">Gagal memuat data: ${err.message}. Pastikan Web App Apps Script sudah di-deploy dengan akses "Anyone".</span>`;
       }
     }
 
@@ -767,7 +815,7 @@
 
     function formatNumber(val) {
       if (!val || val === 0) return '-';
-      return val.toLocaleString('en-US');
+      return val.toLocaleString('id-ID');
     }
 
     function escapeHtml(str) {
@@ -798,11 +846,11 @@
       }, { durasi: 0, uh: 0, transport: 0, penginapan: 0, total: 0 });
 
       document.getElementById('modalSummaryStrip').innerHTML = `
-        <div class="kpi-badge">Total Trips: <strong>${trips.length}</strong></div>
+        <div class="kpi-badge">Total Perjalanan: <strong>${trips.length}</strong></div>
         <div class="kpi-badge">Total Durasi: <strong>${totals.durasi} Hari</strong></div>
-        <div class="kpi-badge">Total UH: <strong>Rp ${totals.uh.toLocaleString('en-US')}</strong></div>
-        <div class="kpi-badge">Total Transport: <strong>Rp ${totals.transport.toLocaleString('en-US')}</strong></div>
-        <div class="kpi-badge">Grand Total: <strong>Rp ${totals.total.toLocaleString('en-US')}</strong></div>
+        <div class="kpi-badge">Total UH: <strong>Rp ${totals.uh.toLocaleString('id-ID')}</strong></div>
+        <div class="kpi-badge">Total Transport: <strong>Rp ${totals.transport.toLocaleString('id-ID')}</strong></div>
+        <div class="kpi-badge">Total Keseluruhan: <strong>Rp ${totals.total.toLocaleString('id-ID')}</strong></div>
       `;
 
       let detailHtml = `
@@ -810,7 +858,7 @@
           <tr>
             <th>No</th>
             <th>Bulan</th>
-            <th>Lokus</th>
+            <th>Tujuan</th>
             <th>Berangkat</th>
             <th>Pulang</th>
             <th class="num">Durasi</th>
@@ -824,10 +872,11 @@
       `;
 
       trips.forEach((t, idx) => {
+        const bulanId = MONTH_ID_MAP[t.helperMonth] || t.helperMonth;
         detailHtml += `
           <tr>
             <td>${idx + 1}</td>
-            <td>${escapeHtml(t.helperMonth)}</td>
+            <td>${escapeHtml(bulanId)}</td>
             <td><span class="lokus-badge">${escapeHtml(t.lokus)}</span></td>
             <td>${escapeHtml(t.berangkat)}</td>
             <td>${escapeHtml(t.pulang)}</td>
@@ -870,14 +919,12 @@
       const showNip = document.getElementById('chkNip').checked;
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
 
-      const selectedMetrics = Array.from(document.querySelectorAll('.metric-chk:checked'))
+      // Kolom 'total' selalu disertakan + metrik tambahan yang dicentang
+      const extraMetrics = Array.from(document.querySelectorAll('.metric-chk:checked'))
         .map(cb => cb.value);
+      const selectedMetrics = ['total', ...extraMetrics];
 
       const table = document.getElementById('pivotTable');
-      if (selectedMetrics.length === 0) {
-        table.innerHTML = '<tr><td style="padding:24px; text-align:center; color:#64748b;">Please tick at least one column metric above.</td></tr>';
-        return;
-      }
 
       const filtered = rawData.filter(r =>
         !search || r.nama.toLowerCase().includes(search) || r.nip.toLowerCase().includes(search)
@@ -927,7 +974,7 @@
         p.rowTotals.count += 1;
       });
 
-      // Apply Dynamic Sorting
+      // Terapkan Pengurutan Dinamis
       const participants = Array.from(participantsMap.values()).sort((a, b) => {
         let cmp = 0;
         if (sortState.type === 'nama') {
@@ -948,7 +995,7 @@
         return sortState.dir === 'asc' ? cmp : -cmp;
       });
 
-      // Build Table Header
+      // Bangun Header Tabel
       const rowSpan = colDim === 'none' ? 1 : 2;
       let thead = '<thead><tr>';
       thead += `<th class="sticky-col-1 sortable ${isSortActive('nama')}" rowspan="${rowSpan}" onclick="toggleSort('nama')">
@@ -956,7 +1003,7 @@
                 </th>`;
 
       if (showNip) {
-        thead += `<th class="sortable ${isSortActive('nip')}" rowspan="${rowSpan}" onclick="toggleSort('nip')">
+        thead += `<th class="nip-col sortable ${isSortActive('nip')}" rowspan="${rowSpan}" onclick="toggleSort('nip')">
                     NIP ${getSortIndicator('nip')}
                   </th>`;
       }
@@ -969,9 +1016,9 @@
         });
       } else {
         colKeys.forEach(ck => {
-          thead += `<th class="group-header" colspan="${selectedMetrics.length}">${ck}</th>`;
+          thead += `<th class="group-header" colspan="${selectedMetrics.length}">${escapeHtml(formatGroupLabel(colDim, ck))}</th>`;
         });
-        thead += `<th class="group-header total-group" colspan="${selectedMetrics.length}">Grand Total</th>`;
+        thead += `<th class="group-header total-group" colspan="${selectedMetrics.length}">Total Keseluruhan</th>`;
         thead += '</tr><tr>';
 
         colKeys.forEach(ck => {
@@ -991,26 +1038,26 @@
       }
       thead += '</tr></thead>';
 
-      // Track vertical Grand Totals
+      // Hitung Total Keseluruhan Vertikal
       const grandTotalsByCol = {};
       colKeys.forEach(ck => {
         grandTotalsByCol[ck] = { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 };
       });
       const overallGrandTotal = { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 };
 
-      // Build Table Body
+      // Bangun Isi Tabel
       let tbody = '<tbody>';
       participants.forEach(p => {
         const encodedNama = encodeURIComponent(p.nama);
         tbody += '<tr>';
         tbody += `<td class="sticky-col-1">
-                    <span class="participant-link" onclick="openParticipantModal('${encodedNama}')" title="Click to view trip details">
-                      ${escapeHtml(p.nama)}
+                    <span class="participant-link" onclick="openParticipantModal('${encodedNama}')" title="${escapeHtml(p.nama)} — Klik untuk melihat rincian">
+                      <span class="participant-name-text">${escapeHtml(p.nama)}</span>
                       <span class="trip-pill">${p.rowTotals.count}x</span>
                     </span>
                   </td>`;
         if (showNip) {
-          tbody += `<td style="color:#64748b;">${escapeHtml(p.nip || '-')}</td>`;
+          tbody += `<td class="nip-col">${escapeHtml(p.nip || '-')}</td>`;
         }
 
         if (colDim === 'none') {
@@ -1037,15 +1084,15 @@
         tbody += '</tr>';
       });
 
-      // Update Header KPI Strip
-      document.getElementById('kpiParticipants').textContent = participants.length;
-      document.getElementById('kpiTrips').textContent = overallGrandTotal.count.toLocaleString('en-US');
-      document.getElementById('kpiTotal').textContent = 'Rp ' + overallGrandTotal.total.toLocaleString('en-US');
+      // Perbarui Strip KPI Header
+      document.getElementById('kpiParticipants').textContent = participants.length.toLocaleString('id-ID');
+      document.getElementById('kpiTrips').textContent = overallGrandTotal.count.toLocaleString('id-ID');
+      document.getElementById('kpiTotal').textContent = 'Rp ' + overallGrandTotal.total.toLocaleString('id-ID');
 
-      // Grand Total Footer Row
+      // Baris Footer Total Keseluruhan
       tbody += '<tr class="grand-total-row">';
-      tbody += `<td class="sticky-col-1">Grand Total (${participants.length} Participants)</td>`;
-      if (showNip) tbody += '<td></td>';
+      tbody += `<td class="sticky-col-1" title="Total Keseluruhan (${participants.length} Peserta)">Total (${participants.length} Peserta)</td>`;
+      if (showNip) tbody += '<td class="nip-col"></td>';
 
       if (colDim === 'none') {
         selectedMetrics.forEach(m => {
