@@ -9,17 +9,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-light: #eff6ff;
-      --primary-border: #bfdbfe;
+      --primary: #00A896;
+      --primary-hover: #008778;
+      --primary-light: #e6f7f5;
+      --primary-border: #99dcd4;
+      --accent-lime: #7BC143;
+      --accent-lime-light: #f2f9ec;
       --surface: #ffffff;
       --bg: #f1f5f9;
       --text-main: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
       --header-bg: #f8fafc;
-      --header-group-bg: #eef2ff;
+      --header-group-bg: #e6f7f5;
       --total-col-bg: #f8fafc;
       --hover-row: #f1f5f9;
       --radius: 10px;
@@ -46,6 +48,7 @@
       border-radius: 14px;
       box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
       border: 1px solid var(--border);
+      border-top: 4px solid var(--primary);
     }
 
     /* Header & KPI Strip */
@@ -89,6 +92,7 @@
     .kpi-badge {
       background: var(--header-bg);
       border: 1px solid var(--border);
+      border-left: 3px solid var(--accent-lime);
       padding: 6px 12px;
       border-radius: 8px;
       font-size: 12px;
@@ -116,7 +120,7 @@
       font-family: inherit;
       cursor: pointer;
       transition: all 0.15s ease;
-      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
+      box-shadow: 0 1px 2px rgba(0, 168, 150, 0.25);
     }
 
     button.refresh-btn:hover {
@@ -171,7 +175,7 @@
 
     select:focus, input[type="text"]:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.15);
     }
 
     /* Pill Tickboxes */
@@ -278,15 +282,15 @@
 
     th.group-header {
       background-color: var(--header-group-bg);
-      color: #1e3a8a;
+      color: #006b5f;
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
 
     th.group-header.total-group {
-      background-color: #dbeafe;
-      color: #1e40af;
+      background-color: var(--accent-lime-light);
+      color: #3f6d1b;
     }
 
     thead tr:nth-child(2) th {
@@ -304,7 +308,7 @@
     }
 
     th.sortable.active-sort {
-      background-color: #dbeafe;
+      background-color: #ccf0ec;
       color: var(--primary-hover);
     }
 
@@ -339,6 +343,33 @@
     th.sticky-col-1 {
       background: var(--header-bg);
       z-index: 5;
+    }
+
+    /* Clickable Participant Name */
+    .participant-link {
+      color: var(--primary-hover);
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      transition: color 0.15s ease;
+    }
+
+    .participant-link:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    .trip-pill {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--accent-lime-light);
+      color: #4d8024;
+      border: 1px solid #cce7b5;
+      padding: 1px 7px;
+      border-radius: 999px;
     }
 
     tbody tr:nth-child(even) td {
@@ -378,7 +409,7 @@
       position: sticky;
       bottom: 0;
       z-index: 4;
-      border-top: 2px solid #94a3b8;
+      border-top: 2px solid var(--primary);
       border-bottom: none;
     }
 
@@ -409,6 +440,135 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    /* Participant Details Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #fff;
+      width: 100%;
+      max-width: 960px;
+      max-height: 85vh;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.25);
+      border-top: 4px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalFadeIn 0.16s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      background: #f8fafc;
+    }
+
+    .modal-title h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-title span {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .modal-close {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--primary-light);
+      color: var(--primary-hover);
+      border-color: var(--primary);
+    }
+
+    .modal-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 14px 24px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-body {
+      padding: 18px 24px 24px;
+      overflow: auto;
+    }
+
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .detail-table th {
+      background: var(--header-group-bg);
+      color: #006b5f;
+      position: static;
+      text-align: left;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+    }
+
+    .detail-table th.num {
+      text-align: right;
+    }
+
+    .detail-table td {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+    }
+
+    .lokus-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--primary-light);
+      color: var(--primary-hover);
+    }
   </style>
 </head>
 <body>
@@ -416,7 +576,7 @@
     <div class="header-bar">
       <div class="title-group">
         <h2>Rekap Perjalanan Dinas</h2>
-        <p>Click any column header to sort • Toggle checkboxes to customize visible metrics</p>
+        <p>Click a participant's name to view trip details • Click any column header to sort</p>
       </div>
       <div class="header-actions">
         <div class="kpi-strip" id="kpiStrip" style="display:none;">
@@ -469,6 +629,23 @@
     </div>
   </div>
 
+  <!-- Participant Trip Details Modal -->
+  <div class="modal-backdrop" id="detailModal" onclick="handleBackdropClick(event)">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalParticipantName">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="modalParticipantName">Participant Name</h3>
+          <span id="modalParticipantNip">NIP: -</span>
+        </div>
+        <button class="modal-close" onclick="closeDetailModal()" title="Close">&times;</button>
+      </div>
+      <div class="modal-summary" id="modalSummaryStrip"></div>
+      <div class="modal-body">
+        <table class="detail-table" id="modalDetailTable"></table>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbxnKC368E18uUWsiKqy1LAT1Cpp5OChatRnMi5LAx-QkleqGzLNcj28wLufZo7nb74yNA/exec';
 
@@ -497,6 +674,10 @@
     ];
 
     window.onload = fetchSheetData;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDetailModal();
+    });
 
     async function fetchSheetData() {
       const statusEl = document.getElementById('status');
@@ -561,7 +742,6 @@
         sortState.type = type;
         sortState.colKey = colKey;
         sortState.metric = metric;
-        // Default numeric columns to descending (highest first), text columns to ascending
         sortState.dir = (type === 'nama' || type === 'nip') ? 'asc' : 'desc';
       }
       renderPivot();
@@ -588,6 +768,101 @@
     function formatNumber(val) {
       if (!val || val === 0) return '-';
       return val.toLocaleString('en-US');
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function openParticipantModal(encodedName) {
+      const nama = decodeURIComponent(encodedName);
+      const trips = rawData.filter(r => r.nama === nama);
+      if (trips.length === 0) return;
+
+      const nip = trips.find(t => t.nip)?.nip || '-';
+      document.getElementById('modalParticipantName').textContent = nama;
+      document.getElementById('modalParticipantNip').textContent = `NIP: ${nip}`;
+
+      const totals = trips.reduce((acc, t) => {
+        acc.durasi += t.durasi;
+        acc.uh += t.uh;
+        acc.transport += t.transport;
+        acc.penginapan += t.penginapan;
+        acc.total += t.total;
+        return acc;
+      }, { durasi: 0, uh: 0, transport: 0, penginapan: 0, total: 0 });
+
+      document.getElementById('modalSummaryStrip').innerHTML = `
+        <div class="kpi-badge">Total Trips: <strong>${trips.length}</strong></div>
+        <div class="kpi-badge">Total Durasi: <strong>${totals.durasi} Hari</strong></div>
+        <div class="kpi-badge">Total UH: <strong>Rp ${totals.uh.toLocaleString('en-US')}</strong></div>
+        <div class="kpi-badge">Total Transport: <strong>Rp ${totals.transport.toLocaleString('en-US')}</strong></div>
+        <div class="kpi-badge">Grand Total: <strong>Rp ${totals.total.toLocaleString('en-US')}</strong></div>
+      `;
+
+      let detailHtml = `
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Bulan</th>
+            <th>Lokus</th>
+            <th>Berangkat</th>
+            <th>Pulang</th>
+            <th class="num">Durasi</th>
+            <th class="num">UH (Rp)</th>
+            <th class="num">Transport (Rp)</th>
+            <th class="num">Penginapan 30%</th>
+            <th class="num">Total (Rp)</th>
+          </tr>
+        </thead>
+        <tbody>
+      `;
+
+      trips.forEach((t, idx) => {
+        detailHtml += `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>${escapeHtml(t.helperMonth)}</td>
+            <td><span class="lokus-badge">${escapeHtml(t.lokus)}</span></td>
+            <td>${escapeHtml(t.berangkat)}</td>
+            <td>${escapeHtml(t.pulang)}</td>
+            <td class="num">${formatNumber(t.durasi)}</td>
+            <td class="num">${formatNumber(t.uh)}</td>
+            <td class="num">${formatNumber(t.transport)}</td>
+            <td class="num">${formatNumber(t.penginapan)}</td>
+            <td class="num" style="font-weight:600;">${formatNumber(t.total)}</td>
+          </tr>
+        `;
+      });
+
+      detailHtml += `
+        <tr style="background:#f1f5f9; font-weight:700;">
+          <td colspan="5">Total (${trips.length} Perjalanan Dinas)</td>
+          <td class="num">${formatNumber(totals.durasi)}</td>
+          <td class="num">${formatNumber(totals.uh)}</td>
+          <td class="num">${formatNumber(totals.transport)}</td>
+          <td class="num">${formatNumber(totals.penginapan)}</td>
+          <td class="num">${formatNumber(totals.total)}</td>
+        </tr>
+      </tbody>`;
+
+      document.getElementById('modalDetailTable').innerHTML = detailHtml;
+      document.getElementById('detailModal').classList.add('open');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.remove('open');
+    }
+
+    function handleBackdropClick(e) {
+      if (e.target.id === 'detailModal') {
+        closeDetailModal();
+      }
     }
 
     function renderPivot() {
@@ -726,10 +1001,16 @@
       // Build Table Body
       let tbody = '<tbody>';
       participants.forEach(p => {
+        const encodedNama = encodeURIComponent(p.nama);
         tbody += '<tr>';
-        tbody += `<td class="sticky-col-1">${p.nama}</td>`;
+        tbody += `<td class="sticky-col-1">
+                    <span class="participant-link" onclick="openParticipantModal('${encodedNama}')" title="Click to view trip details">
+                      ${escapeHtml(p.nama)}
+                      <span class="trip-pill">${p.rowTotals.count}x</span>
+                    </span>
+                  </td>`;
         if (showNip) {
-          tbody += `<td style="color:#64748b;">${p.nip || '-'}</td>`;
+          tbody += `<td style="color:#64748b;">${escapeHtml(p.nip || '-')}</td>`;
         }
 
         if (colDim === 'none') {
