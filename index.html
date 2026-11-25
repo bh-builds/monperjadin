@@ -710,7 +710,7 @@
         </select>
       </div>
 
-      <!-- Kotak Centang Pemilihan Kolom Tambahan (Kolom Total selalu aktif) -->
+      <!-- Kotak Centang Pemilihan Kolom Tambahan (Kolom Total selalu aktif di paling kanan) -->
       <div class="control-group">
         <span class="control-label">Kolom</span>
 
@@ -1067,10 +1067,10 @@
       const showNip = document.getElementById('chkNip').checked;
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
 
-      // Kolom 'total' selalu disertakan + metrik tambahan yang dicentang
+      // Metrik tambahan yang dicentang ditampilkan lebih dulu, kolom 'total' selalu di paling kanan
       const extraMetrics = Array.from(document.querySelectorAll('.metric-chk:checked'))
         .map(cb => cb.value);
-      const selectedMetrics = ['total', ...extraMetrics];
+      const selectedMetrics = [...extraMetrics, 'total'];
 
       const table = document.getElementById('pivotTable');
 
@@ -1212,7 +1212,7 @@
           selectedMetrics.forEach(m => {
             const val = p.rowTotals[m];
             overallGrandTotal[m] += val;
-            tbody += `<td class="num total-col ${val === 0 ? 'zero' : ''}">${formatNumber(val)}</td>`;
+            tbody += `<td class="num ${m === 'total' ? 'total-col' : ''} ${val === 0 ? 'zero' : ''}">${formatNumber(val)}</td>`;
           });
         } else {
           colKeys.forEach(ck => {
