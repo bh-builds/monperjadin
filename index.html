@@ -3,167 +3,438 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Perjadin - Dynamic Pivot Table</title>
+  <title>Rekap Perjadin — Dynamic Pivot Table</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #1a73e8;
-      --border: #dadce0;
-      --bg: #f8f9fa;
-      --header-bg: #eef3fc;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --surface: #ffffff;
+      --bg: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --header-bg: #f8fafc;
+      --header-group-bg: #eef2ff;
+      --total-col-bg: #f8fafc;
+      --hover-row: #f1f5f9;
+      --radius: 10px;
     }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 24px;
       background-color: var(--bg);
-      color: #202124;
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
     }
+
     .container {
-      max-width: 1400px;
+      max-width: 1440px;
       margin: 0 auto;
-      background: #fff;
-      padding: 20px 24px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      background: var(--surface);
+      padding: 24px 28px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+      border: 1px solid var(--border);
     }
+
+    /* Header & KPI Strip */
     .header-bar {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
     }
-    h2 {
+
+    .title-group h2 {
       margin: 0;
-      font-size: 20px;
-      color: #1f1f1f;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
     }
+
+    .title-group p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .kpi-strip {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .kpi-badge {
+      background: var(--header-bg);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .kpi-badge strong {
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 13px;
+      margin-left: 4px;
+    }
+
     button.refresh-btn {
-      padding: 6px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
       background: var(--primary);
       color: #fff;
       border: none;
-      border-radius: 4px;
+      border-radius: 8px;
       font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
       cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
     }
+
     button.refresh-btn:hover {
-      background: #1557b0;
+      background: var(--primary-hover);
+      transform: translateY(-1px);
     }
+
+    button.refresh-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Controls Panel */
     .controls {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 18px 24px;
       align-items: center;
-      padding: 14px 16px;
-      background: var(--bg);
+      padding: 16px 18px;
+      background: #f8fafc;
       border: 1px solid var(--border);
-      border-radius: 6px;
-      margin-bottom: 16px;
+      border-radius: var(--radius);
+      margin-bottom: 18px;
     }
+
     .control-group {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
+
     .control-label {
       font-weight: 600;
-      font-size: 13px;
-      color: #444;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-right: 4px;
     }
+
     select, input[type="text"] {
-      padding: 6px 10px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
+      padding: 7px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
       font-size: 13px;
+      font-family: inherit;
+      color: var(--text-main);
       background: #fff;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    /* Pill Tickboxes */
     label.tickbox {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
       background: #fff;
-      padding: 5px 10px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
+      color: #334155;
+      padding: 6px 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
       user-select: none;
+      transition: all 0.15s ease;
     }
+
     label.tickbox:hover {
       border-color: var(--primary);
+      background: var(--primary-light);
     }
+
+    label.tickbox:has(input:checked) {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-hover);
+      font-weight: 600;
+    }
+
+    label.tickbox input[type="checkbox"] {
+      accent-color: var(--primary);
+      width: 14px;
+      height: 14px;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .search-box {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .search-box input {
+      padding-right: 28px;
+      min-width: 220px;
+    }
+
+    .clear-search {
+      position: absolute;
+      right: 8px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+      padding: 0 4px;
+    }
+
+    .clear-search:hover {
+      color: var(--text-main);
+    }
+
+    /* Table Styling */
     .table-wrapper {
-      overflow-x: auto;
-      max-height: 72vh;
+      overflow: auto;
+      max-height: 70vh;
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: var(--radius);
+      background: #fff;
     }
+
     table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       font-size: 13px;
     }
+
     th, td {
-      padding: 8px 12px;
-      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
       white-space: nowrap;
     }
+
+    th:last-child, td:last-child {
+      border-right: none;
+    }
+
     th {
       background-color: var(--header-bg);
       font-weight: 600;
+      color: #1e293b;
       text-align: center;
       position: sticky;
       top: 0;
       z-index: 2;
+      user-select: none;
     }
+
+    th.group-header {
+      background-color: var(--header-group-bg);
+      color: #1e3a8a;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    th.group-header.total-group {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+
     thead tr:nth-child(2) th {
-      top: 33px;
+      top: 37px;
     }
+
+    /* Sortable Headers */
+    th.sortable {
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    th.sortable:hover {
+      background-color: #e2e8f0;
+    }
+
+    th.sortable.active-sort {
+      background-color: #dbeafe;
+      color: var(--primary-hover);
+    }
+
+    .sort-icon {
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+      vertical-align: middle;
+    }
+
+    th.sortable.active-sort .sort-icon {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* Sticky First Column */
     th.sticky-col-1, td.sticky-col-1 {
       position: sticky;
       left: 0;
-      background: #fff;
       z-index: 3;
       text-align: left;
+      border-right: 2px solid #cbd5e1;
     }
+
+    td.sticky-col-1 {
+      background: #fff;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
     th.sticky-col-1 {
       background: var(--header-bg);
-      z-index: 4;
+      z-index: 5;
     }
+
+    tbody tr:nth-child(even) td {
+      background-color: #fcfcfd;
+    }
+
+    tbody tr:nth-child(even) td.sticky-col-1 {
+      background-color: #fcfcfd;
+    }
+
+    tbody tr:hover td,
+    tbody tr:hover td.sticky-col-1 {
+      background-color: var(--primary-light);
+    }
+
     td.num {
       text-align: right;
       font-variant-numeric: tabular-nums;
+      color: #334155;
     }
-    tr:hover td {
-      background-color: #f1f6fe;
+
+    td.num.zero {
+      color: #cbd5e1;
     }
+
+    td.total-col {
+      background-color: #f8fafc;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Grand Total Footer */
     tr.grand-total-row td {
       font-weight: 700;
-      background-color: #e8eaed;
+      background-color: #e2e8f0 !important;
+      color: #0f172a;
       position: sticky;
       bottom: 0;
-      z-index: 3;
+      z-index: 4;
+      border-top: 2px solid #94a3b8;
+      border-bottom: none;
     }
+
+    tr.grand-total-row td.sticky-col-1 {
+      z-index: 6;
+    }
+
+    /* Status & Loader */
     #status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       font-size: 14px;
-      color: #5f6368;
-      padding: 20px 0;
+      color: var(--text-muted);
+      padding: 40px 20px;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid #cbd5e1;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header-bar">
-      <h2>Rekap Perjalanan Dinas — Pivot Table</h2>
-      <button class="refresh-btn" onclick="fetchSheetData()">Refresh Data</button>
+      <div class="title-group">
+        <h2>Rekap Perjalanan Dinas</h2>
+        <p>Click any column header to sort • Toggle checkboxes to customize visible metrics</p>
+      </div>
+      <div class="header-actions">
+        <div class="kpi-strip" id="kpiStrip" style="display:none;">
+          <div class="kpi-badge">Participants: <strong id="kpiParticipants">0</strong></div>
+          <div class="kpi-badge">Total Trips: <strong id="kpiTrips">0</strong></div>
+          <div class="kpi-badge">Grand Total: <strong id="kpiTotal">Rp 0</strong></div>
+        </div>
+        <button class="refresh-btn" onclick="fetchSheetData()">
+          <span>↻</span> Refresh Data
+        </button>
+      </div>
     </div>
 
     <div class="controls">
       <!-- Column Pivot Dimension -->
       <div class="control-group">
-        <span class="control-label">Group Columns By:</span>
-        <select id="colDimension" onchange="renderPivot()">
+        <span class="control-label">Group By</span>
+        <select id="colDimension" onchange="resetSortAndRender()">
           <option value="helperMonth" selected>Month (HelperMonth)</option>
           <option value="lokus">Destination (Lokus)</option>
           <option value="none">None (Summary Only)</option>
@@ -172,7 +443,7 @@
 
       <!-- Tick Boxes for Selecting Columns / Metrics -->
       <div class="control-group">
-        <span class="control-label">Select Columns:</span>
+        <span class="control-label">Columns</span>
         <label class="tickbox"><input type="checkbox" id="chkNip" checked onchange="renderPivot()"> NIP</label>
         <label class="tickbox"><input type="checkbox" class="metric-chk" value="total" checked onchange="renderPivot()"> Total (Rp)</label>
         <label class="tickbox"><input type="checkbox" class="metric-chk" value="uh" onchange="renderPivot()"> UH (Rp)</label>
@@ -184,22 +455,32 @@
 
       <!-- Participant Search Filter -->
       <div class="control-group">
-        <span class="control-label">Filter Participant:</span>
-        <input type="text" id="searchInput" placeholder="Search Nama or NIP..." oninput="renderPivot()">
+        <span class="control-label">Filter</span>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search Nama or NIP..." oninput="handleSearch()">
+          <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()" title="Clear search">&times;</button>
+        </div>
       </div>
     </div>
 
-    <div id="status">Loading spreadsheet data...</div>
+    <div id="status"><div class="spinner"></div><span>Loading spreadsheet data...</span></div>
     <div class="table-wrapper" id="tableContainer" style="display:none;">
       <table id="pivotTable"></table>
     </div>
   </div>
 
   <script>
-    // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW
     const API_URL = 'https://script.google.com/macros/s/AKfycbxnKC368E18uUWsiKqy1LAT1Cpp5OChatRnMi5LAx-QkleqGzLNcj28wLufZo7nb74yNA/exec';
 
     let rawData = [];
+
+    // Sort state: type can be 'nama', 'nip', 'colMetric', or 'totalMetric'
+    let sortState = {
+      type: 'nama',
+      colKey: null,
+      metric: null,
+      dir: 'asc' // 'asc' | 'desc'
+    };
 
     const METRIC_LABELS = {
       total: 'Total',
@@ -220,13 +501,14 @@
     async function fetchSheetData() {
       const statusEl = document.getElementById('status');
       const tableContainer = document.getElementById('tableContainer');
+      const kpiStrip = document.getElementById('kpiStrip');
 
-      statusEl.style.display = 'block';
-      statusEl.textContent = 'Loading spreadsheet data...';
+      statusEl.style.display = 'flex';
+      statusEl.innerHTML = '<div class="spinner"></div><span>Loading spreadsheet data...</span>';
       tableContainer.style.display = 'none';
+      kpiStrip.style.display = 'none';
 
       try {
-        // Google Apps Script redirects GET requests; default fetch follows redirects cleanly
         const response = await fetch(API_URL, {
           method: 'GET',
           redirect: 'follow'
@@ -244,10 +526,63 @@
         rawData = result.data;
         statusEl.style.display = 'none';
         tableContainer.style.display = 'block';
+        kpiStrip.style.display = 'flex';
         renderPivot();
       } catch (err) {
-        statusEl.textContent = 'Error loading data: ' + err.message + '. Make sure the Apps Script Web App is deployed with access set to "Anyone".';
+        statusEl.innerHTML = `<span style="color:#dc2626;">Error loading data: ${err.message}. Make sure the Apps Script Web App is deployed with access set to "Anyone".</span>`;
       }
+    }
+
+    function handleSearch() {
+      const val = document.getElementById('searchInput').value;
+      document.getElementById('clearSearchBtn').style.display = val ? 'block' : 'none';
+      renderPivot();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearchBtn').style.display = 'none';
+      renderPivot();
+    }
+
+    function resetSortAndRender() {
+      sortState = { type: 'nama', colKey: null, metric: null, dir: 'asc' };
+      renderPivot();
+    }
+
+    function toggleSort(type, colKey = null, metric = null) {
+      if (
+        sortState.type === type &&
+        sortState.colKey === colKey &&
+        sortState.metric === metric
+      ) {
+        sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortState.type = type;
+        sortState.colKey = colKey;
+        sortState.metric = metric;
+        // Default numeric columns to descending (highest first), text columns to ascending
+        sortState.dir = (type === 'nama' || type === 'nip') ? 'asc' : 'desc';
+      }
+      renderPivot();
+    }
+
+    function getSortIndicator(type, colKey = null, metric = null) {
+      const isMatch =
+        sortState.type === type &&
+        sortState.colKey === colKey &&
+        sortState.metric === metric;
+
+      if (!isMatch) return '<span class="sort-icon">⇅</span>';
+      return `<span class="sort-icon">${sortState.dir === 'asc' ? '▲' : '▼'}</span>`;
+    }
+
+    function isSortActive(type, colKey = null, metric = null) {
+      return (
+        sortState.type === type &&
+        sortState.colKey === colKey &&
+        sortState.metric === metric
+      ) ? 'active-sort' : '';
     }
 
     function formatNumber(val) {
@@ -265,7 +600,7 @@
 
       const table = document.getElementById('pivotTable');
       if (selectedMetrics.length === 0) {
-        table.innerHTML = '<tr><td style="padding:16px;">Please tick at least one column metric above.</td></tr>';
+        table.innerHTML = '<tr><td style="padding:24px; text-align:center; color:#64748b;">Please tick at least one column metric above.</td></tr>';
         return;
       }
 
@@ -317,55 +652,91 @@
         p.rowTotals.count += 1;
       });
 
-      const participants = Array.from(participantsMap.values())
-        .sort((a, b) => a.nama.localeCompare(b.nama));
+      // Apply Dynamic Sorting
+      const participants = Array.from(participantsMap.values()).sort((a, b) => {
+        let cmp = 0;
+        if (sortState.type === 'nama') {
+          cmp = a.nama.localeCompare(b.nama);
+        } else if (sortState.type === 'nip') {
+          cmp = (a.nip || '').localeCompare(b.nip || '');
+        } else if (sortState.type === 'colMetric') {
+          const valA = (a.byCol[sortState.colKey] && a.byCol[sortState.colKey][sortState.metric]) || 0;
+          const valB = (b.byCol[sortState.colKey] && b.byCol[sortState.colKey][sortState.metric]) || 0;
+          cmp = valA - valB;
+        } else if (sortState.type === 'totalMetric') {
+          const valA = a.rowTotals[sortState.metric] || 0;
+          const valB = b.rowTotals[sortState.metric] || 0;
+          cmp = valA - valB;
+        }
 
+        if (cmp === 0) cmp = a.nama.localeCompare(b.nama);
+        return sortState.dir === 'asc' ? cmp : -cmp;
+      });
+
+      // Build Table Header
+      const rowSpan = colDim === 'none' ? 1 : 2;
       let thead = '<thead><tr>';
-      thead += `<th class="sticky-col-1" rowspan="${colDim === 'none' ? 1 : 2}">Nama</th>`;
+      thead += `<th class="sticky-col-1 sortable ${isSortActive('nama')}" rowspan="${rowSpan}" onclick="toggleSort('nama')">
+                  Nama ${getSortIndicator('nama')}
+                </th>`;
+
       if (showNip) {
-        thead += `<th rowspan="${colDim === 'none' ? 1 : 2}">NIP</th>`;
+        thead += `<th class="sortable ${isSortActive('nip')}" rowspan="${rowSpan}" onclick="toggleSort('nip')">
+                    NIP ${getSortIndicator('nip')}
+                  </th>`;
       }
 
       if (colDim === 'none') {
         selectedMetrics.forEach(m => {
-          thead += `<th>${METRIC_LABELS[m]}</th>`;
+          thead += `<th class="sortable ${isSortActive('totalMetric', null, m)}" onclick="toggleSort('totalMetric', null, '${m}')">
+                      ${METRIC_LABELS[m]} ${getSortIndicator('totalMetric', null, m)}
+                    </th>`;
         });
       } else {
         colKeys.forEach(ck => {
-          thead += `<th colspan="${selectedMetrics.length}">${ck}</th>`;
+          thead += `<th class="group-header" colspan="${selectedMetrics.length}">${ck}</th>`;
         });
-        thead += `<th colspan="${selectedMetrics.length}">Grand Total</th>`;
+        thead += `<th class="group-header total-group" colspan="${selectedMetrics.length}">Grand Total</th>`;
         thead += '</tr><tr>';
-        colKeys.forEach(() => {
+
+        colKeys.forEach(ck => {
+          const safeCk = ck.replace(/'/g, "\\'");
           selectedMetrics.forEach(m => {
-            thead += `<th>${METRIC_LABELS[m]}</th>`;
+            thead += `<th class="sortable ${isSortActive('colMetric', ck, m)}" onclick="toggleSort('colMetric', '${safeCk}', '${m}')">
+                        ${METRIC_LABELS[m]} ${getSortIndicator('colMetric', ck, m)}
+                      </th>`;
           });
         });
+
         selectedMetrics.forEach(m => {
-          thead += `<th>${METRIC_LABELS[m]}</th>`;
+          thead += `<th class="sortable ${isSortActive('totalMetric', null, m)}" onclick="toggleSort('totalMetric', null, '${m}')">
+                      ${METRIC_LABELS[m]} ${getSortIndicator('totalMetric', null, m)}
+                    </th>`;
         });
       }
       thead += '</tr></thead>';
 
+      // Track vertical Grand Totals
       const grandTotalsByCol = {};
       colKeys.forEach(ck => {
         grandTotalsByCol[ck] = { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 };
       });
       const overallGrandTotal = { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 };
 
+      // Build Table Body
       let tbody = '<tbody>';
       participants.forEach(p => {
         tbody += '<tr>';
         tbody += `<td class="sticky-col-1">${p.nama}</td>`;
         if (showNip) {
-          tbody += `<td>${p.nip || '-'}</td>`;
+          tbody += `<td style="color:#64748b;">${p.nip || '-'}</td>`;
         }
 
         if (colDim === 'none') {
           selectedMetrics.forEach(m => {
             const val = p.rowTotals[m];
             overallGrandTotal[m] += val;
-            tbody += `<td class="num">${formatNumber(val)}</td>`;
+            tbody += `<td class="num total-col ${val === 0 ? 'zero' : ''}">${formatNumber(val)}</td>`;
           });
         } else {
           colKeys.forEach(ck => {
@@ -373,18 +744,24 @@
             selectedMetrics.forEach(m => {
               const val = cellGroup[m];
               grandTotalsByCol[ck][m] += val;
-              tbody += `<td class="num">${formatNumber(val)}</td>`;
+              tbody += `<td class="num ${val === 0 ? 'zero' : ''}">${formatNumber(val)}</td>`;
             });
           });
           selectedMetrics.forEach(m => {
             const val = p.rowTotals[m];
             overallGrandTotal[m] += val;
-            tbody += `<td class="num" style="font-weight:600;">${formatNumber(val)}</td>`;
+            tbody += `<td class="num total-col ${val === 0 ? 'zero' : ''}">${formatNumber(val)}</td>`;
           });
         }
         tbody += '</tr>';
       });
 
+      // Update Header KPI Strip
+      document.getElementById('kpiParticipants').textContent = participants.length;
+      document.getElementById('kpiTrips').textContent = overallGrandTotal.count.toLocaleString('en-US');
+      document.getElementById('kpiTotal').textContent = 'Rp ' + overallGrandTotal.total.toLocaleString('en-US');
+
+      // Grand Total Footer Row
       tbody += '<tr class="grand-total-row">';
       tbody += `<td class="sticky-col-1">Grand Total (${participants.length} Participants)</td>`;
       if (showNip) tbody += '<td></td>';
