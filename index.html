@@ -178,41 +178,122 @@
       box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.15);
     }
 
-    /* Pill Tickboxes */
-    label.tickbox {
+    /* Animated Rounded-Square Tickboxes inside Rounded-Rectangle Label */
+    .checkbox-wrapper-15 {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      background: #fff;
-      color: #334155;
-      padding: 6px 11px;
-      border: 1px solid #cbd5e1;
-      border-radius: 999px;
+    }
+
+    .checkbox-wrapper-15 .cbx {
+      -webkit-user-select: none;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 11px 5px 7px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
       transition: all 0.15s ease;
     }
 
-    label.tickbox:hover {
+    .checkbox-wrapper-15 .cbx:hover {
       border-color: var(--primary);
       background: var(--primary-light);
     }
 
-    label.tickbox:has(input:checked) {
+    .checkbox-wrapper-15 .inp-cbx:checked + .cbx {
       background: var(--primary-light);
       border-color: var(--primary);
+    }
+
+    .checkbox-wrapper-15 .cbx span {
+      display: inline-block;
+      vertical-align: middle;
+      transform: translate3d(0, 0, 0);
+    }
+
+    .checkbox-wrapper-15 .cbx span:first-child {
+      position: relative;
+      width: 19px;
+      height: 19px;
+      border-radius: 5px;
+      transform: scale(1);
+      vertical-align: middle;
+      border: 1.5px solid #cbd5e1;
+      background: #fff;
+      transition: all 0.2s ease;
+    }
+
+    .checkbox-wrapper-15 .cbx span:first-child svg {
+      position: absolute;
+      z-index: 1;
+      top: 4px;
+      left: 3px;
+      width: 11px;
+      height: 8px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2.3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 16px;
+      stroke-dashoffset: 16px;
+      transition: all 0.3s ease;
+      transition-delay: 0.1s;
+      transform: translate3d(0, 0, 0);
+    }
+
+    .checkbox-wrapper-15 .cbx span:first-child:before {
+      content: "";
+      width: 100%;
+      height: 100%;
+      background: var(--primary);
+      display: block;
+      transform: scale(0);
+      opacity: 1;
+      border-radius: 5px;
+      transition-delay: 0.2s;
+    }
+
+    .checkbox-wrapper-15 .cbx span:last-child {
+      margin-left: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #334155;
+      transition: color 0.2s ease;
+    }
+
+    .checkbox-wrapper-15 .cbx:hover span:first-child {
+      border-color: var(--primary-hover);
+    }
+
+    .checkbox-wrapper-15 .inp-cbx:checked + .cbx span:first-child {
+      border-color: var(--primary-hover);
+      background: var(--primary);
+      animation: check-15 0.5s ease;
+    }
+
+    .checkbox-wrapper-15 .inp-cbx:checked + .cbx span:first-child svg {
+      stroke-dashoffset: 0;
+    }
+
+    .checkbox-wrapper-15 .inp-cbx:checked + .cbx span:first-child:before {
+      transform: scale(2);
+      opacity: 0;
+      transition: all 0.5s ease;
+    }
+
+    .checkbox-wrapper-15 .inp-cbx:checked + .cbx span:last-child {
       color: var(--primary-hover);
       font-weight: 600;
     }
 
-    label.tickbox input[type="checkbox"] {
-      accent-color: var(--primary);
-      width: 14px;
-      height: 14px;
-      margin: 0;
-      cursor: pointer;
+    @keyframes check-15 {
+      50% {
+        transform: scale(1.16);
+      }
     }
 
     .search-box {
@@ -632,12 +713,78 @@
       <!-- Kotak Centang Pemilihan Kolom Tambahan (Kolom Total selalu aktif) -->
       <div class="control-group">
         <span class="control-label">Kolom</span>
-        <label class="tickbox"><input type="checkbox" id="chkNip" checked onchange="renderPivot()"> NIP</label>
-        <label class="tickbox"><input type="checkbox" class="metric-chk" value="uh" onchange="renderPivot()"> UH (Rp)</label>
-        <label class="tickbox"><input type="checkbox" class="metric-chk" value="transport" onchange="renderPivot()"> Transport (Rp)</label>
-        <label class="tickbox"><input type="checkbox" class="metric-chk" value="penginapan" onchange="renderPivot()"> Penginapan 30%</label>
-        <label class="tickbox"><input type="checkbox" class="metric-chk" value="durasi" onchange="renderPivot()"> Durasi (Hari)</label>
-        <label class="tickbox"><input type="checkbox" class="metric-chk" value="count" onchange="renderPivot()"> Jumlah Perjadin</label>
+
+        <div class="checkbox-wrapper-15">
+          <input class="inp-cbx" id="chkNip" type="checkbox" checked onchange="renderPivot()" style="display: none;"/>
+          <label class="cbx" for="chkNip">
+            <span>
+              <svg width="12px" height="9px" viewBox="0 0 12 9">
+                <polyline points="1 5 4 8 11 1"></polyline>
+              </svg>
+            </span>
+            <span>NIP</span>
+          </label>
+        </div>
+
+        <div class="checkbox-wrapper-15">
+          <input class="inp-cbx metric-chk" id="chkUh" type="checkbox" value="uh" onchange="renderPivot()" style="display: none;"/>
+          <label class="cbx" for="chkUh">
+            <span>
+              <svg width="12px" height="9px" viewBox="0 0 12 9">
+                <polyline points="1 5 4 8 11 1"></polyline>
+              </svg>
+            </span>
+            <span>UH (Rp)</span>
+          </label>
+        </div>
+
+        <div class="checkbox-wrapper-15">
+          <input class="inp-cbx metric-chk" id="chkTransport" type="checkbox" value="transport" onchange="renderPivot()" style="display: none;"/>
+          <label class="cbx" for="chkTransport">
+            <span>
+              <svg width="12px" height="9px" viewBox="0 0 12 9">
+                <polyline points="1 5 4 8 11 1"></polyline>
+              </svg>
+            </span>
+            <span>Transport (Rp)</span>
+          </label>
+        </div>
+
+        <div class="checkbox-wrapper-15">
+          <input class="inp-cbx metric-chk" id="chkPenginapan" type="checkbox" value="penginapan" onchange="renderPivot()" style="display: none;"/>
+          <label class="cbx" for="chkPenginapan">
+            <span>
+              <svg width="12px" height="9px" viewBox="0 0 12 9">
+                <polyline points="1 5 4 8 11 1"></polyline>
+              </svg>
+            </span>
+            <span>Penginapan 30%</span>
+          </label>
+        </div>
+
+        <div class="checkbox-wrapper-15">
+          <input class="inp-cbx metric-chk" id="chkDurasi" type="checkbox" value="durasi" onchange="renderPivot()" style="display: none;"/>
+          <label class="cbx" for="chkDurasi">
+            <span>
+              <svg width="12px" height="9px" viewBox="0 0 12 9">
+                <polyline points="1 5 4 8 11 1"></polyline>
+              </svg>
+            </span>
+            <span>Durasi (Hari)</span>
+          </label>
+        </div>
+
+        <div class="checkbox-wrapper-15">
+          <input class="inp-cbx metric-chk" id="chkCount" type="checkbox" value="count" onchange="renderPivot()" style="display: none;"/>
+          <label class="cbx" for="chkCount">
+            <span>
+              <svg width="12px" height="9px" viewBox="0 0 12 9">
+                <polyline points="1 5 4 8 11 1"></polyline>
+              </svg>
+            </span>
+            <span>Jumlah Perjadin</span>
+          </label>
+        </div>
       </div>
 
       <!-- Pencarian Peserta -->
