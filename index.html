@@ -59,7 +59,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--border);
     }
@@ -88,6 +88,7 @@
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
+      margin-bottom: 16px;
     }
 
     .kpi-badge {
@@ -687,28 +688,29 @@
     <div class="header-bar">
       <div class="title-group">
         <h2>Rekap Perjalanan Dinas</h2>
-        <p>Klik nama peserta untuk melihat rincian perjalanan • Klik judul kolom untuk mengurutkan</p>
+        <p>Klik nama pegawai untuk melihat rincian perjalanan • Klik judul kolom untuk mengurutkan</p>
       </div>
       <div class="header-actions">
-        <div class="kpi-strip" id="kpiStrip" style="display:none;">
-          <div class="kpi-badge">Peserta: <strong id="kpiParticipants">0</strong></div>
-          <div class="kpi-badge">Total Perjalanan: <strong id="kpiTrips">0</strong></div>
-          <div class="kpi-badge">Total Keseluruhan: <strong id="kpiTotal">Rp 0</strong></div>
-        </div>
         <button class="refresh-btn" onclick="fetchSheetData()">
           <span>↻</span> Muat Ulang Data
         </button>
       </div>
     </div>
 
+    <div class="kpi-strip" id="kpiStrip" style="display:none;">
+      <div class="kpi-badge">Pegawai : <strong id="kpiParticipants">0</strong></div>
+      <div class="kpi-badge">Jumlah Perjadin : <strong id="kpiTrips">0</strong></div>
+      <div class="kpi-badge">Total : <strong id="kpiTotal">Rp 0</strong></div>
+    </div>
+
     <div class="controls">
       <!-- Dimensi Pengelompokan Kolom -->
       <div class="control-group">
-        <span class="control-label">Kelompokkan</span>
+        <span class="control-label">Kelompokkan by</span>
         <select id="colDimension" onchange="resetSortAndRender()">
-          <option value="helperMonth" selected>Bulan (HelperMonth)</option>
+          <option value="helperMonth" selected>Bulan</option>
           <option value="lokus">Tujuan</option>
-          <option value="none">Tanpa Pengelompokan (Ringkasan)</option>
+          <option value="none">Total Saja</option>
         </select>
       </div>
 
@@ -1234,9 +1236,12 @@
         tbody += '</tr>';
       });
 
+      // Hitung total jumlah perjadin secara independen agar KPI selalu tampil meski kolom 'Jumlah Perjadin' tidak dicentang
+      const totalTripsCount = participants.reduce((sum, p) => sum + p.rowTotals.count, 0);
+
       // Perbarui Strip KPI Header
       document.getElementById('kpiParticipants').textContent = participants.length.toLocaleString('id-ID');
-      document.getElementById('kpiTrips').textContent = overallGrandTotal.count.toLocaleString('id-ID');
+      document.getElementById('kpiTrips').textContent = totalTripsCount.toLocaleString('id-ID');
       document.getElementById('kpiTotal').textContent = 'Rp ' + overallGrandTotal.total.toLocaleString('id-ID');
 
       // Baris Footer Total Keseluruhan
@@ -1265,4 +1270,3 @@
   </script>
 </body>
 </html>
-
