@@ -16,6 +16,11 @@
       --primary-border: #99dcd4;
       --accent-lime: #7BC143;
       --accent-lime-light: #f2f9ec;
+      --amber-bg: #fffbeb;
+      --amber-header: #fef3c7;
+      --amber-hover: #fef3c7;
+      --amber-border: #fcd34d;
+      --amber-text: #b45309;
       --surface: #ffffff;
       --bg: #f1f5f9;
       --text-main: #0f172a;
@@ -354,6 +359,11 @@
       border-bottom: 1px solid var(--primary-border);
     }
 
+    .daily-header-banner.weekend-banner {
+      background: var(--amber-header);
+      border-bottom-color: var(--amber-border);
+    }
+
     .daily-header-banner h3 {
       margin: 0;
       font-size: 14px;
@@ -361,10 +371,18 @@
       color: #006b5f;
     }
 
+    .daily-header-banner.weekend-banner h3 {
+      color: var(--amber-text);
+    }
+
     .daily-header-banner span {
       font-size: 12px;
       font-weight: 600;
       color: var(--primary-hover);
+    }
+
+    .daily-header-banner.weekend-banner span {
+      color: var(--amber-text);
     }
 
     .daily-table-scroll {
@@ -443,9 +461,15 @@
       border-right: none;
     }
 
+    /* Amber Accent for Sabtu & Minggu Columns */
     .weekday-header.weekend {
-      background: #eef6f5;
-      color: #0f766e;
+      background: var(--amber-header);
+      color: var(--amber-text);
+      border-right-color: var(--amber-border);
+    }
+
+    .weekday-header.weekend:first-of-type {
+      border-left: 1px solid var(--amber-border);
     }
 
     .calendar-grid {
@@ -479,17 +503,33 @@
       background: #f8fafc;
     }
 
+    .cal-day.weekend {
+      background: var(--amber-bg);
+      border-right-color: #fde68a;
+      border-bottom-color: #fde68a;
+    }
+
+    .cal-day.weekend:nth-child(7n - 1) {
+      border-left: 1px solid var(--amber-border);
+    }
+
+    .cal-day.weekend:hover {
+      background: var(--amber-hover);
+    }
+
     .cal-day.other-month {
       background: #f8fafc;
       opacity: 0.55;
     }
 
-    .cal-day.weekend {
-      background: #fcfdfe;
+    .cal-day.weekend.other-month {
+      background: var(--amber-bg);
+      opacity: 0.6;
     }
 
     .cal-day.today {
       background: #f0fdfb;
+      box-shadow: inset 0 0 0 1.5px var(--primary);
     }
 
     .cal-day-top {
@@ -513,6 +553,11 @@
       border-radius: 6px;
     }
 
+    .cal-day.weekend .day-num {
+      color: var(--amber-text);
+      font-weight: 700;
+    }
+
     .cal-day.today .day-num {
       background: var(--primary);
       color: #fff;
@@ -528,6 +573,12 @@
       border: 1px solid #cce7b5;
       padding: 1px 6px;
       border-radius: 999px;
+    }
+
+    .cal-day.weekend .day-count-badge {
+      color: var(--amber-text);
+      background: var(--amber-header);
+      border-color: var(--amber-border);
     }
 
     .day-events {
@@ -555,6 +606,16 @@
       background: #ccf0ec;
     }
 
+    .cal-day.weekend .event-chip {
+      background: #ffffff;
+      border-left-color: #d97706;
+      box-shadow: 0 1px 2px rgba(180, 83, 9, 0.08);
+    }
+
+    .cal-day.weekend .event-chip:hover {
+      background: #fef3c7;
+    }
+
     .event-name {
       font-weight: 600;
       color: #0f172a;
@@ -580,6 +641,12 @@
       white-space: nowrap;
     }
 
+    .cal-day.weekend .event-lokus {
+      color: var(--amber-text);
+      background: var(--amber-bg);
+      border-color: var(--amber-border);
+    }
+
     .more-events-btn {
       margin-top: 1px;
       font-size: 11px;
@@ -593,9 +660,17 @@
       border-radius: 4px;
     }
 
+    .cal-day.weekend .more-events-btn {
+      color: var(--amber-text);
+    }
+
     .more-events-btn:hover {
       background: var(--primary-light);
       text-decoration: underline;
+    }
+
+    .cal-day.weekend .more-events-btn:hover {
+      background: var(--amber-header);
     }
 
     /* Status & Loader */
@@ -993,7 +1068,7 @@
 
     function getMondayOfWeek(d) {
       const day = d.getDay();
-      const diff = (day + 6) % 7; // Senin = 0, Minggu = 6
+      const diff = (day + 6) % 7;
       return new Date(d.getFullYear(), d.getMonth(), d.getDate() - diff);
     }
 
@@ -1246,9 +1321,10 @@
 
       const container = document.getElementById('dailyContainer');
       const dateTitle = formatIndoDate(activeDate, true);
+      const isWeekend = activeDate.getDay() === 0 || activeDate.getDay() === 6;
 
       let html = `
-        <div class="daily-header-banner">
+        <div class="daily-header-banner ${isWeekend ? 'weekend-banner' : ''}">
           <h3>📅 ${escapeHtml(dateTitle)}</h3>
           <span>${dayTrips.length} Pegawai Sedang Perjalanan Dinas</span>
         </div>
