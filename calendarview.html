@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalender Perjadin — Dit Prodis Alkes</title>
+  <link rel="icon" type="image/png" href="./favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00A896;
+      --primary-hover: #008778;
+      --primary-light: #e6f7f5;
+      --primary-border: #99dcd4;
+      --accent-lime: #7BC143;
+      --accent-lime-light: #f2f9ec;
+      --surface: #ffffff;
+      --bg: #f1f5f9;
+      --text-main: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --header-bg: #f8fafc;
+      --header-group-bg: #e6f7f5;
+      --radius-sm: 8px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 18px 20px;
+      background-color: var(--bg);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+      background: var(--surface);
+      padding: 20px 24px;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--primary);
+    }
+
+    /* Header Bar */
+    .header-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .title-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .title-group h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .unit-tag {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--primary-hover);
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      padding: 2px 9px;
+      border-radius: 999px;
+      letter-spacing: 0.01em;
+    }
+
+    .title-group p {
+      margin: 0;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button.refresh-btn,
+    button.nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    button.refresh-btn {
+      background: var(--primary);
+      color: #fff;
+      border: 1px solid var(--primary);
+      box-shadow: 0 1px 2px rgba(0, 168, 150, 0.25);
+    }
+
+    button.refresh-btn:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    button.nav-btn {
+      background: #ffffff;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-strong);
+      padding: 6px 11px;
+    }
+
+    button.nav-btn:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-hover);
+    }
+
+    /* Streamlined KPI Strip */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, max-content));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .kpi-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 14px;
+      transition: border-color 0.15s ease;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--primary-border);
+    }
+
+    .kpi-card.highlight {
+      background: linear-gradient(135deg, #f0fdfb 0%, #f8fafc 100%);
+      border-color: #bfeae4;
+    }
+
+    .kpi-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      background: var(--primary-light);
+      color: var(--primary-hover);
+      flex-shrink: 0;
+    }
+
+    .kpi-card.lime .kpi-icon {
+      background: var(--accent-lime-light);
+      color: #4d8024;
+    }
+
+    .kpi-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .kpi-value {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* 2-Column Controls Bar */
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 290px) 1fr;
+      gap: 12px 20px;
+      align-items: center;
+      padding: 11px 14px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 14px;
+    }
+
+    .controls-search-col {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .controls-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px 14px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .control-divider {
+      width: 1px;
+      height: 22px;
+      background: var(--border-strong);
+    }
+
+    .control-label {
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-right: 2px;
+    }
+
+    select, input[type="text"] {
+      padding: 6px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-family: inherit;
+      font-weight: 500;
+      color: var(--text-main);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.14);
+    }
+
+    /* Search Box */
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 9px;
+      font-size: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-box input {
+      padding-left: 28px;
+      padding-right: 26px;
+      width: 100%;
+    }
+
+    .clear-search {
+      position: absolute;
+      right: 6px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 15px;
+      cursor: pointer;
+      display: none;
+      padding: 0 4px;
+      line-height: 1;
+    }
+
+    .clear-search:hover {
+      color: var(--text-main);
+    }
+
+    /* Calendar Grid */
+    .calendar-wrapper {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      background: var(--header-group-bg);
+      border-bottom: 1px solid var(--border-strong);
+    }
+
+    .weekday-header {
+      padding: 9px 10px;
+      text-align: center;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #006b5f;
+      border-right: 1px solid var(--primary-border);
+    }
+
+    .weekday-header:last-child {
+      border-right: none;
+    }
+
+    .weekday-header.weekend {
+      background: #eef6f5;
+      color: #0f766e;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      grid-auto-rows: minmax(122px, auto);
+    }
+
+    .cal-day {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #fff;
+      cursor: pointer;
+      transition: background-color 0.14s ease;
+      min-width: 0;
+    }
+
+    .cal-day:nth-child(7n) {
+      border-right: none;
+    }
+
+    .cal-day:hover {
+      background: #f8fafc;
+    }
+
+    .cal-day.other-month {
+      background: #f8fafc;
+      opacity: 0.55;
+    }
+
+    .cal-day.weekend {
+      background: #fcfdfe;
+    }
+
+    .cal-day.today {
+      background: #f0fdfb;
+    }
+
+    .cal-day-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .day-num {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+    }
+
+    .cal-day.today .day-num {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .day-count-badge {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #4d8024;
+      background: var(--accent-lime-light);
+      border: 1px solid #cce7b5;
+      padding: 1px 6px;
+      border-radius: 999px;
+    }
+
+    .day-events {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .event-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 5px;
+      padding: 3px 6px;
+      border-radius: 5px;
+      background: var(--primary-light);
+      border-left: 3px solid var(--primary);
+      color: var(--text-main);
+      font-size: 11.5px;
+      line-height: 1.25;
+      transition: background-color 0.12s ease;
+    }
+
+    .event-chip:hover {
+      background: #ccf0ec;
+    }
+
+    .event-name {
+      font-weight: 600;
+      color: #0f172a;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .event-lokus {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--primary-hover);
+      background: #ffffff;
+      border: 1px solid var(--primary-border);
+      padding: 0 4px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      max-width: 72px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .more-events-btn {
+      margin-top: 1px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary-hover);
+      background: none;
+      border: none;
+      padding: 2px 4px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .more-events-btn:hover {
+      background: var(--primary-light);
+      text-decoration: underline;
+    }
+
+    /* Status & Loader */
+    #status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      padding: 48px 20px;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid var(--border-strong);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Day / Trip Details Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.48);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #fff;
+      width: 100%;
+      max-width: 960px;
+      max-height: 86vh;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.25);
+      border-top: 4px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalFadeIn 0.16s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      background: #f8fafc;
+    }
+
+    .modal-title h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-title span {
+      display: inline-block;
+      margin-top: 3px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .modal-close {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      font-size: 18px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--primary-light);
+      color: var(--primary-hover);
+      border-color: var(--primary);
+    }
+
+    .modal-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 22px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-kpi-pill {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 5px 11px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .modal-kpi-pill strong {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--text-main);
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    .modal-body {
+      padding: 16px 22px 22px;
+      overflow: auto;
+    }
+
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    .detail-table th {
+      background: var(--header-group-bg);
+      color: #006b5f;
+      text-align: left;
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+    }
+
+    .detail-table th.num, .detail-table td.num {
+      text-align: right;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .detail-table td {
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+    }
+
+    .lokus-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 500;
+      background: var(--primary-light);
+      color: var(--primary-hover);
+    }
+
+    @media (max-width: 960px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+      .controls-right {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .container { padding: 16px; }
+      .control-divider { display: none; }
+      .calendar-wrapper { overflow-x: auto; }
+      .calendar-weekdays, .calendar-grid { min-width: 820px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <div class="title-group">
+        <div class="title-top">
+          <h2>Kalender Perjalanan Dinas</h2>
+          <span class="unit-tag">Dit Prodis Alkes</span>
+        </div>
+        <p>Klik tanggal atau nama pegawai pada kalender untuk melihat rincian perjalanan dinas</p>
+      </div>
+      <div class="header-actions">
+        <button class="refresh-btn" onclick="fetchSheetData()">
+          <span>↻</span> Refresh Data
+        </button>
+      </div>
+    </div>
+
+    <div class="kpi-strip" id="kpiStrip" style="display:none;">
+      <div class="kpi-card">
+        <div class="kpi-icon">👤</div>
+        <div class="kpi-meta">
+          <span class="kpi-label">Pegawai Bertugas</span>
+          <span class="kpi-value" id="kpiParticipants">0</span>
+        </div>
+      </div>
+      <div class="kpi-card lime">
+        <div class="kpi-icon">✈</div>
+        <div class="kpi-meta">
+          <span class="kpi-label">Perjadin Bulan Ini</span>
+          <span class="kpi-value" id="kpiTrips">0</span>
+        </div>
+      </div>
+      <div class="kpi-card highlight">
+        <div class="kpi-icon">Rp</div>
+        <div class="kpi-meta">
+          <span class="kpi-label">Total Realisasi Bulan Ini</span>
+          <span class="kpi-value" id="kpiTotal">Rp 0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <!-- Kolom Kiri: Pencarian -->
+      <div class="controls-search-col">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Cari Nama, NIP, atau Tujuan..." oninput="handleSearch()">
+          <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()" title="Hapus pencarian">&times;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Filter Tujuan & Navigasi Bulan/Tahun -->
+      <div class="controls-right">
+        <div class="control-group">
+          <span class="control-label">Tujuan</span>
+          <select id="lokusFilter" onchange="renderCalendar()">
+            <option value="">Semua Tujuan</option>
+          </select>
+        </div>
+
+        <div class="control-divider"></div>
+
+        <div class="control-group">
+          <span class="control-label">Periode</span>
+          <button class="nav-btn" onclick="changeMonth(-1)" title="Bulan Sebelumnya">‹</button>
+          <select id="monthSelect" onchange="onPeriodChange()"></select>
+          <select id="yearSelect" onchange="onPeriodChange()"></select>
+          <button class="nav-btn" onclick="changeMonth(1)" title="Bulan Berikutnya">›</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="status"><div class="spinner"></div><span>Memuat data kalender...</span></div>
+
+    <div class="calendar-wrapper" id="calendarContainer" style="display:none;">
+      <div class="calendar-weekdays">
+        <div class="weekday-header">Senin</div>
+        <div class="weekday-header">Selasa</div>
+        <div class="weekday-header">Rabu</div>
+        <div class="weekday-header">Kamis</div>
+        <div class="weekday-header">Jumat</div>
+        <div class="weekday-header weekend">Sabtu</div>
+        <div class="weekday-header weekend">Minggu</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+  </div>
+
+  <!-- Modal Rincian Tanggal / Pegawai -->
+  <div class="modal-backdrop" id="detailModal" onclick="handleBackdropClick(event)">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitleText">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="modalTitleText">Rincian Perjalanan Dinas</h3>
+          <span id="modalSubtitleText">-</span>
+        </div>
+        <button class="modal-close" onclick="closeDetailModal()" title="Tutup">&times;</button>
+      </div>
+      <div class="modal-summary" id="modalSummaryStrip"></div>
+      <div class="modal-body">
+        <table class="detail-table" id="modalDetailTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxnKC368E18uUWsiKqy1LAT1Cpp5OChatRnMi5LAx-QkleqGzLNcj28wLufZo7nb74yNA/exec';
+
+    let rawData = [];
+    let parsedTrips = [];
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth(); // 0 - 11
+
+    const MONTHS_ID = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    const MONTH_EN_TO_IDX = {
+      january: 0, februari: 1, february: 1, maret: 2, march: 2,
+      april: 3, mei: 4, may: 4, juni: 5, june: 5,
+      juli: 6, july: 6, agustus: 7, august: 7, september: 8,
+      oktober: 9, october: 9, november: 10, desember: 11, december: 11,
+      januari: 0
+    };
+
+    window.onload = fetchSheetData;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDetailModal();
+    });
+
+    function parseDateFlexible(str) {
+      if (!str) return null;
+      const s = String(str).trim();
+
+      // Format ISO: YYYY-MM-DD atau timestamp
+      const isoMatch = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      if (isoMatch) {
+        return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+      }
+
+      // Format DD/MM/YYYY atau DD-MM-YYYY
+      const dmyMatch = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+      if (dmyMatch) {
+        return new Date(Number(dmyMatch[3]), Number(dmyMatch[2]) - 1, Number(dmyMatch[1]));
+      }
+
+      // Format "12 Januari 2026" atau "12 Jan 2026"
+      const textMatch = s.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+      if (textMatch) {
+        const day = Number(textMatch[1]);
+        const mKey = textMatch[2].toLowerCase();
+        const year = Number(textMatch[3]);
+        const foundKey = Object.keys(MONTH_EN_TO_IDX).find(k => k.startsWith(mKey.slice(0, 3)));
+        if (foundKey !== undefined) {
+          return new Date(year, MONTH_EN_TO_IDX[foundKey], day);
+        }
+      }
+
+      const fallback = new Date(s);
+      if (!isNaN(fallback.getTime())) {
+        return new Date(fallback.getFullYear(), fallback.getMonth(), fallback.getDate());
+      }
+      return null;
+    }
+
+    function normalizeDate(d) {
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+
+    function dateToKey(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    async function fetchSheetData() {
+      const statusEl = document.getElementById('status');
+      const calContainer = document.getElementById('calendarContainer');
+      const kpiStrip = document.getElementById('kpiStrip');
+
+      statusEl.style.display = 'flex';
+      statusEl.innerHTML = '<div class="spinner"></div><span>Memuat data kalender...</span>';
+      calContainer.style.display = 'none';
+      kpiStrip.style.display = 'none';
+
+      try {
+        const response = await fetch(API_URL, { method: 'GET', redirect: 'follow' });
+        if (!response.ok) throw new Error('Kesalahan HTTP ' + response.status);
+
+        const result = await response.json();
+        if (result.status !== 'success') throw new Error(result.message || 'Gagal memproses data');
+
+        rawData = result.data || [];
+        prepareTripsAndControls();
+
+        statusEl.style.display = 'none';
+        calContainer.style.display = 'block';
+        kpiStrip.style.display = 'grid';
+        renderCalendar();
+      } catch (err) {
+        statusEl.innerHTML = `<span style="color:#dc2626;">Gagal memuat data: ${err.message}. Pastikan Web App Apps Script sudah di-deploy dengan akses "Anyone".</span>`;
+      }
+    }
+
+    function prepareTripsAndControls() {
+      const yearsSet = new Set([new Date().getFullYear()]);
+      const lokusSet = new Set();
+
+      parsedTrips = rawData.map((row, idx) => {
+        if (row.lokus) lokusSet.add(row.lokus);
+
+        let start = parseDateFlexible(row.berangkat);
+        let end = parseDateFlexible(row.pulang);
+
+        if (start && !end) {
+          const dur = Math.max(1, Number(row.durasi) || 1);
+          end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + dur - 1);
+        } else if (!start && end) {
+          start = end;
+        }
+
+        if (start) {
+          start = normalizeDate(start);
+          end = normalizeDate(end);
+          if (end < start) end = start;
+          yearsSet.add(start.getFullYear());
+          yearsSet.add(end.getFullYear());
+        }
+
+        return {
+          ...row,
+          _id: idx,
+          startDate: start,
+          endDate: end
+        };
+      });
+
+      // Pilih periode default dari perjalanan terbaru yang tersedia jika bulan saat ini kosong
+      const validStarts = parsedTrips.filter(t => t.startDate).map(t => t.startDate);
+      if (validStarts.length > 0) {
+        const latest = new Date(Math.max(...validStarts.map(d => d.getTime())));
+        currentYear = latest.getFullYear();
+        currentMonth = latest.getMonth();
+      }
+
+      // Isi dropdown Bulan
+      const monthSelect = document.getElementById('monthSelect');
+      monthSelect.innerHTML = MONTHS_ID.map((name, i) =>
+        `<option value="${i}" ${i === currentMonth ? 'selected' : ''}>${name}</option>`
+      ).join('');
+
+      // Isi dropdown Tahun
+      const sortedYears = Array.from(yearsSet).sort((a, b) => a - b);
+      const yearSelect = document.getElementById('yearSelect');
+      yearSelect.innerHTML = sortedYears.map(y =>
+        `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`
+      ).join('');
+
+      // Isi dropdown Tujuan (Lokus)
+      const lokusSelect = document.getElementById('lokusFilter');
+      const currentLokus = lokusSelect.value;
+      const sortedLokus = Array.from(lokusSet).sort();
+      lokusSelect.innerHTML = '<option value="">Semua Tujuan</option>' +
+        sortedLokus.map(l => `<option value="${escapeHtml(l)}" ${l === currentLokus ? 'selected' : ''}>${escapeHtml(l)}</option>`).join('');
+    }
+
+    function handleSearch() {
+      const val = document.getElementById('searchInput').value;
+      document.getElementById('clearSearchBtn').style.display = val ? 'block' : 'none';
+      renderCalendar();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearchBtn').style.display = 'none';
+      renderCalendar();
+    }
+
+    function onPeriodChange() {
+      currentMonth = Number(document.getElementById('monthSelect').value);
+      currentYear = Number(document.getElementById('yearSelect').value);
+      renderCalendar();
+    }
+
+    function changeMonth(delta) {
+      let newMonth = currentMonth + delta;
+      let newYear = currentYear;
+      if (newMonth < 0) {
+        newMonth = 11;
+        newYear -= 1;
+      } else if (newMonth > 11) {
+        newMonth = 0;
+        newYear += 1;
+      }
+
+      const yearSelect = document.getElementById('yearSelect');
+      if (!Array.from(yearSelect.options).some(o => Number(o.value) === newYear)) {
+        const opt = document.createElement('option');
+        opt.value = newYear;
+        opt.textContent = newYear;
+        yearSelect.appendChild(opt);
+      }
+
+      currentMonth = newMonth;
+      currentYear = newYear;
+      document.getElementById('monthSelect').value = currentMonth;
+      yearSelect.value = currentYear;
+      renderCalendar();
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatNumber(val) {
+      if (!val || val === 0) return '-';
+      return Number(val).toLocaleString('id-ID');
+    }
+
+    function getFilteredTrips() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const lokus = document.getElementById('lokusFilter').value;
+
+      return parsedTrips.filter(t => {
+        if (!t.startDate || !t.endDate) return false;
+        if (lokus && t.lokus !== lokus) return false;
+        if (search) {
+          const matchName = (t.nama || '').toLowerCase().includes(search);
+          const matchNip = (t.nip || '').toLowerCase().includes(search);
+          const matchLokus = (t.lokus || '').toLowerCase().includes(search);
+          if (!matchName && !matchNip && !matchLokus) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderCalendar() {
+      const filtered = getFilteredTrips();
+
+      const monthStart = new Date(currentYear, currentMonth, 1);
+      const monthEnd = new Date(currentYear, currentMonth + 1, 0);
+
+      // Perjalanan yang bersinggungan dengan bulan aktif
+      const monthTrips = filtered.filter(t => t.startDate <= monthEnd && t.endDate >= monthStart);
+
+      // Hitung KPI Bulan Aktif
+      const uniqueParticipants = new Set(monthTrips.map(t => t.nama));
+      const totalBiaya = monthTrips.reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+
+      document.getElementById('kpiParticipants').textContent = uniqueParticipants.size.toLocaleString('id-ID');
+      document.getElementById('kpiTrips').textContent = monthTrips.length.toLocaleString('id-ID');
+      document.getElementById('kpiTotal').textContent = 'Rp ' + totalBiaya.toLocaleString('id-ID');
+
+      // Hitung sel kalender (Senin sebagai hari pertama)
+      const firstWeekday = (monthStart.getDay() + 6) % 7; // 0 = Senin, 6 = Minggu
+      const gridStart = new Date(currentYear, currentMonth, 1 - firstWeekday);
+
+      const totalDaysInMonth = monthEnd.getDate();
+      const totalCells = Math.ceil((firstWeekday + totalDaysInMonth) / 7) * 7;
+
+      const todayKey = dateToKey(new Date());
+      const gridEl = document.getElementById('calendarGrid');
+      let html = '';
+
+      for (let i = 0; i < totalCells; i++) {
+        const cellDate = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
+        const cellKey = dateToKey(cellDate);
+        const isOtherMonth = cellDate.getMonth() !== currentMonth;
+        const dayOfWeek = cellDate.getDay(); // 0 = Minggu, 6 = Sabtu
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const isToday = cellKey === todayKey;
+
+        const dayTrips = filtered
+          .filter(t => t.startDate <= cellDate && t.endDate >= cellDate)
+          .sort((a, b) => a.nama.localeCompare(b.nama));
+
+        const classes = ['cal-day'];
+        if (isOtherMonth) classes.push('other-month');
+        if (isWeekend) classes.push('weekend');
+        if (isToday) classes.push('today');
+
+        const MAX_VISIBLE = 3;
+        const visibleTrips = dayTrips.slice(0, MAX_VISIBLE);
+        const hiddenCount = dayTrips.length - visibleTrips.length;
+
+        html += `<div class="${classes.join(' ')}" onclick="openDayModal('${cellKey}')">`;
+        html += `<div class="cal-day-top">
+                   <span class="day-num">${cellDate.getDate()}</span>
+                   ${dayTrips.length > 0 ? `<span class="day-count-badge">${dayTrips.length}</span>` : ''}
+                 </div>`;
+
+        html += `<div class="day-events">`;
+        visibleTrips.forEach(t => {
+          html += `<div class="event-chip" title="${escapeHtml(t.nama)} — ${escapeHtml(t.lokus)} (${escapeHtml(t.berangkat)} s.d. ${escapeHtml(t.pulang)})">
+                     <span class="event-name">${escapeHtml(t.nama)}</span>
+                     <span class="event-lokus">${escapeHtml(t.lokus)}</span>
+                   </div>`;
+        });
+        if (hiddenCount > 0) {
+          html += `<button type="button" class="more-events-btn">+${hiddenCount} pegawai lainnya</button>`;
+        }
+        html += `</div></div>`;
+      }
+
+      gridEl.innerHTML = html;
+    }
+
+    function openDayModal(dateKey) {
+      const [y, m, d] = dateKey.split('-').map(Number);
+      const targetDate = new Date(y, m - 1, d);
+      const dayTrips = getFilteredTrips()
+        .filter(t => t.startDate <= targetDate && t.endDate >= targetDate)
+        .sort((a, b) => a.nama.localeCompare(b.nama));
+
+      if (dayTrips.length === 0) return;
+
+      const formattedDate = `${d} ${MONTHS_ID[m - 1]} ${y}`;
+      document.getElementById('modalTitleText').textContent = `Jadwal Perjalanan Dinas — ${formattedDate}`;
+      document.getElementById('modalSubtitleText').textContent = `${dayTrips.length} pegawai sedang melaksanakan perjalanan dinas`;
+
+      const uniqueLokus = new Set(dayTrips.map(t => t.lokus));
+      const totalBiaya = dayTrips.reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+
+      document.getElementById('modalSummaryStrip').innerHTML = `
+        <div class="modal-kpi-pill">Jumlah Pegawai: <strong>${dayTrips.length}</strong></div>
+        <div class="modal-kpi-pill">Jumlah Tujuan: <strong>${uniqueLokus.size}</strong></div>
+        <div class="modal-kpi-pill">Akumulasi Biaya: <strong>Rp ${totalBiaya.toLocaleString('id-ID')}</strong></div>
+      `;
+
+      let detailHtml = `
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Pegawai</th>
+            <th>NIP</th>
+            <th>Tujuan</th>
+            <th>Berangkat</th>
+            <th>Pulang</th>
+            <th class="num">Durasi</th>
+            <th class="num">Total (Rp)</th>
+          </tr>
+        </thead>
+        <tbody>
+      `;
+
+      dayTrips.forEach((t, idx) => {
+        detailHtml += `
+          <tr>
+            <td>${idx + 1}</td>
+            <td style="font-weight:600; color:#0f172a;">${escapeHtml(t.nama)}</td>
+            <td style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#64748b;">${escapeHtml(t.nip || '-')}</td>
+            <td><span class="lokus-badge">${escapeHtml(t.lokus)}</span></td>
+            <td>${escapeHtml(t.berangkat)}</td>
+            <td>${escapeHtml(t.pulang)}</td>
+            <td class="num">${formatNumber(t.durasi)} hr</td>
+            <td class="num" style="font-weight:600;">${formatNumber(t.total)}</td>
+          </tr>
+        `;
+      });
+
+      detailHtml += `</tbody>`;
+      document.getElementById('modalDetailTable').innerHTML = detailHtml;
+      document.getElementById('detailModal').classList.add('open');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.remove('open');
+    }
+
+    function handleBackdropClick(e) {
+      if (e.target.id === 'detailModal') {
+        closeDetailModal();
+      }
+    }
+  </script>
+</body>
+</html>
