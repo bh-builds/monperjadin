@@ -107,10 +107,12 @@
 
     .header-actions {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 8px;
     }
 
+    a.calendar-btn,
     button.refresh-btn,
     button.export-btn {
       display: inline-flex;
@@ -121,8 +123,21 @@
       font-size: 12.5px;
       font-weight: 600;
       font-family: inherit;
+      text-decoration: none;
       cursor: pointer;
       transition: all 0.15s ease;
+    }
+
+    a.calendar-btn {
+      background: #ffffff;
+      color: var(--primary-hover);
+      border: 1px solid var(--primary-border);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    a.calendar-btn:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
     }
 
     button.refresh-btn {
@@ -846,6 +861,9 @@
         <p>Klik nama pegawai untuk melihat rincian perjalanan • Klik judul kolom untuk mengurutkan</p>
       </div>
       <div class="header-actions">
+        <a class="calendar-btn" href="https://bh-builds.github.io/monperjadin/calendarview.html">
+          <span>📅</span> Kalender
+        </a>
         <button class="export-btn" id="downloadXlsxBtn" onclick="exportTableToXlsx()" disabled>
           <span>⬇</span> Download XLSX
         </button>
