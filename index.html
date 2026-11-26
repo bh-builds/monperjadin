@@ -220,13 +220,12 @@
       color: var(--text-main);
     }
 
-    /* Streamlined Controls Bar */
+    /* 2-Column Controls Bar (Left: Search, Right: Grouping & Columns) */
     .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px 18px;
+      display: grid;
+      grid-template-columns: minmax(220px, 280px) 1fr;
+      gap: 12px 20px;
       align-items: center;
-      justify-content: space-between;
       padding: 11px 14px;
       background: #f8fafc;
       border: 1px solid var(--border);
@@ -234,11 +233,18 @@
       margin-bottom: 14px;
     }
 
+    .controls-search-col {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
     .controls-left {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 12px 18px;
+      justify-content: flex-end;
+      gap: 10px 16px;
     }
 
     .control-group {
@@ -400,8 +406,9 @@
     /* Search Box */
     .search-box {
       position: relative;
-      display: inline-flex;
+      display: flex;
       align-items: center;
+      width: 100%;
     }
 
     .search-icon {
@@ -415,7 +422,7 @@
     .search-box input {
       padding-left: 28px;
       padding-right: 26px;
-      min-width: 215px;
+      width: 100%;
     }
 
     .clear-search {
@@ -812,11 +819,19 @@
       color: var(--primary-hover);
     }
 
+    @media (max-width: 960px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+      .controls-left {
+        justify-content: flex-start;
+      }
+    }
+
     @media (max-width: 768px) {
       body { padding: 12px; }
       .container { padding: 16px; }
       .control-divider { display: none; }
-      .search-box, .search-box input { width: 100%; }
     }
   </style>
 </head>
@@ -865,6 +880,16 @@
     </div>
 
     <div class="controls">
+      <!-- Kolom Kiri: Pencarian Peserta -->
+      <div class="controls-search-col">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Cari Nama atau NIP..." oninput="handleSearch()">
+          <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()" title="Hapus pencarian">&times;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Dimensi Pengelompokan & Pilihan Kolom -->
       <div class="controls-left">
         <!-- Dimensi Pengelompokan Kolom -->
         <div class="control-group">
@@ -953,15 +978,6 @@
               <span>Jumlah Perjadin</span>
             </label>
           </div>
-        </div>
-      </div>
-
-      <!-- Pencarian Peserta -->
-      <div class="control-group">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" placeholder="Cari Nama atau NIP..." oninput="handleSearch()">
-          <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()" title="Hapus pencarian">&times;</button>
         </div>
       </div>
     </div>
