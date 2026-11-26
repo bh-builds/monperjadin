@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary: #00A896;
@@ -81,7 +82,7 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .kpi-strip {
@@ -107,13 +108,12 @@
       margin-left: 4px;
     }
 
-    button.refresh-btn {
+    button.refresh-btn,
+    button.export-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       padding: 8px 16px;
-      background: var(--primary);
-      color: #fff;
       border: none;
       border-radius: 8px;
       font-size: 13px;
@@ -121,6 +121,11 @@
       font-family: inherit;
       cursor: pointer;
       transition: all 0.15s ease;
+    }
+
+    button.refresh-btn {
+      background: var(--primary);
+      color: #fff;
       box-shadow: 0 1px 2px rgba(0, 168, 150, 0.25);
     }
 
@@ -131,6 +136,29 @@
 
     button.refresh-btn:active {
       transform: translateY(0);
+    }
+
+    button.export-btn {
+      background: #ffffff;
+      color: #3f6d1b;
+      border: 1px solid #b5dc94;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    button.export-btn:hover {
+      background: var(--accent-lime-light);
+      border-color: var(--accent-lime);
+      transform: translateY(-1px);
+    }
+
+    button.export-btn:active {
+      transform: translateY(0);
+    }
+
+    button.export-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
     }
 
     /* Controls Panel */
@@ -691,6 +719,9 @@
         <p>Klik nama pegawai untuk melihat rincian perjalanan • Klik judul kolom untuk mengurutkan</p>
       </div>
       <div class="header-actions">
+        <button class="export-btn" id="downloadXlsxBtn" onclick="exportTableToXlsx()" disabled>
+          <span>⬇</span> Download XLSX
+        </button>
         <button class="refresh-btn" onclick="fetchSheetData()">
           <span>↻</span> Muat Ulang Data
         </button>
@@ -828,6 +859,7 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycbxnKC368E18uUWsiKqy1LAT1Cpp5OChatRnMi5LAx-QkleqGzLNcj28wLufZo7nb74yNA/exec';
 
     let rawData = [];
+    let currentViewState = null;
 
     // Status pengurutan: type berupa 'nama', 'nip', 'colMetric', atau 'totalMetric'
     let sortState = {
@@ -883,11 +915,13 @@
       const statusEl = document.getElementById('status');
       const tableContainer = document.getElementById('tableContainer');
       const kpiStrip = document.getElementById('kpiStrip');
+      const exportBtn = document.getElementById('downloadXlsxBtn');
 
       statusEl.style.display = 'flex';
       statusEl.innerHTML = '<div class="spinner"></div><span>Memuat data spreadsheet...</span>';
       tableContainer.style.display = 'none';
       kpiStrip.style.display = 'none';
+      exportBtn.disabled = true;
 
       try {
         const response = await fetch(API_URL, {
@@ -908,6 +942,7 @@
         statusEl.style.display = 'none';
         tableContainer.style.display = 'block';
         kpiStrip.style.display = 'flex';
+        exportBtn.disabled = false;
         renderPivot();
       } catch (err) {
         statusEl.innerHTML = `<span style="color:#dc2626;">Gagal memuat data: ${err.message}. Pastikan Web App Apps Script sudah di-deploy dengan akses "Anyone".</span>`;
@@ -1244,6 +1279,17 @@
       document.getElementById('kpiTrips').textContent = totalTripsCount.toLocaleString('id-ID');
       document.getElementById('kpiTotal').textContent = 'Rp ' + overallGrandTotal.total.toLocaleString('id-ID');
 
+      // Simpan state tampilan terkini untuk ekspor XLSX
+      currentViewState = {
+        colDim,
+        showNip,
+        selectedMetrics,
+        colKeys,
+        participants,
+        grandTotalsByCol,
+        overallGrandTotal
+      };
+
       // Baris Footer Total Keseluruhan
       tbody += '<tr class="grand-total-row">';
       tbody += `<td class="sticky-col-1" title="Total Keseluruhan (${participants.length} Peserta)">Total (${participants.length} Peserta)</td>`;
@@ -1266,6 +1312,162 @@
       tbody += '</tr></tbody>';
 
       table.innerHTML = thead + tbody;
+    }
+
+    function exportTableToXlsx() {
+      if (!currentViewState || typeof XLSX === 'undefined') return;
+
+      const {
+        colDim,
+        showNip,
+        selectedMetrics,
+        colKeys,
+        participants,
+        grandTotalsByCol,
+        overallGrandTotal
+      } = currentViewState;
+
+      const rows = [];
+      const merges = [];
+      const fixedCols = showNip ? 2 : 1;
+
+      if (colDim === 'none') {
+        const headerRow = ['Nama'];
+        if (showNip) headerRow.push('NIP');
+        selectedMetrics.forEach(m => headerRow.push(METRIC_LABELS[m]));
+        rows.push(headerRow);
+      } else {
+        const topHeader = ['Nama'];
+        const subHeader = [''];
+        if (showNip) {
+          topHeader.push('NIP');
+          subHeader.push('');
+        }
+
+        // Merge kolom tetap (Nama & NIP) secara vertikal (baris 0 sampai baris 1)
+        merges.push({ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } });
+        if (showNip) {
+          merges.push({ s: { r: 0, c: 1 }, e: { r: 1, c: 1 } });
+        }
+
+        let colCursor = fixedCols;
+        const allGroups = [
+          ...colKeys.map(ck => formatGroupLabel(colDim, ck)),
+          'Total Keseluruhan'
+        ];
+
+        allGroups.forEach(groupTitle => {
+          topHeader.push(groupTitle);
+          for (let i = 1; i < selectedMetrics.length; i++) {
+            topHeader.push('');
+          }
+          selectedMetrics.forEach(m => {
+            subHeader.push(METRIC_LABELS[m]);
+          });
+
+          if (selectedMetrics.length > 1) {
+            merges.push({
+              s: { r: 0, c: colCursor },
+              e: { r: 0, c: colCursor + selectedMetrics.length - 1 }
+            });
+          }
+          colCursor += selectedMetrics.length;
+        });
+
+        rows.push(topHeader);
+        rows.push(subHeader);
+      }
+
+      // Baris data peserta sesuai filter dan urutan aktif
+      participants.forEach(p => {
+        const dataRow = [p.nama];
+        if (showNip) dataRow.push(p.nip || '-');
+
+        if (colDim === 'none') {
+          selectedMetrics.forEach(m => {
+            dataRow.push(p.rowTotals[m] || 0);
+          });
+        } else {
+          colKeys.forEach(ck => {
+            const cellGroup = p.byCol[ck] || { total: 0, uh: 0, transport: 0, penginapan: 0, durasi: 0, count: 0 };
+            selectedMetrics.forEach(m => {
+              dataRow.push(cellGroup[m] || 0);
+            });
+          });
+          selectedMetrics.forEach(m => {
+            dataRow.push(p.rowTotals[m] || 0);
+          });
+        }
+        rows.push(dataRow);
+      });
+
+      // Baris footer Total Keseluruhan
+      const totalRow = [`Total (${participants.length} Peserta)`];
+      if (showNip) totalRow.push('');
+
+      if (colDim === 'none') {
+        selectedMetrics.forEach(m => {
+          totalRow.push(overallGrandTotal[m] || 0);
+        });
+      } else {
+        colKeys.forEach(ck => {
+          selectedMetrics.forEach(m => {
+            totalRow.push(grandTotalsByCol[ck][m] || 0);
+          });
+        });
+        selectedMetrics.forEach(m => {
+          totalRow.push(overallGrandTotal[m] || 0);
+        });
+      }
+      rows.push(totalRow);
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      if (merges.length > 0) {
+        ws['!merges'] = merges;
+      }
+
+      const headerRowCount = colDim === 'none' ? 1 : 2;
+      const totalCols = rows[0].length;
+
+      // Terapkan tipe teks pada NIP dan format ribuan (#,##0) pada seluruh sel numerik
+      for (let r = headerRowCount; r < rows.length; r++) {
+        if (showNip) {
+          const nipAddr = XLSX.utils.encode_cell({ r, c: 1 });
+          if (ws[nipAddr]) {
+            ws[nipAddr].t = 's';
+          }
+        }
+        for (let c = fixedCols; c < totalCols; c++) {
+          const cellAddr = XLSX.utils.encode_cell({ r, c });
+          if (ws[cellAddr] && typeof ws[cellAddr].v === 'number') {
+            ws[cellAddr].z = '#,##0';
+          }
+        }
+      }
+
+      // Sesuaikan lebar kolom otomatis
+      const colWidths = [];
+      for (let c = 0; c < totalCols; c++) {
+        let maxLen = 10;
+        for (let r = 0; r < rows.length; r++) {
+          const val = rows[r][c];
+          if (val !== undefined && val !== null) {
+            const formattedLen = typeof val === 'number'
+              ? val.toLocaleString('id-ID').length
+              : String(val).length;
+            if (formattedLen > maxLen) maxLen = formattedLen;
+          }
+        }
+        colWidths.push({ wch: Math.min(maxLen + 4, 42) });
+      }
+      ws['!cols'] = colWidths;
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Rekap Perjadin');
+
+      const dimSlug = colDim === 'helperMonth' ? 'Bulan' : (colDim === 'lokus' ? 'Tujuan' : 'Ringkasan');
+      const today = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `Rekap_Perjadin_${dimSlug}_${today}.xlsx`);
     }
   </script>
 </body>
