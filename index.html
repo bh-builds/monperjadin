@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Perjadin — Tabel Pivot Dinamis</title>
+  <title>Rekap Perjadin — Dit Prodis Alkes</title>
   <link rel="icon" type="image/png" href="./favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -715,7 +715,7 @@
   <div class="container">
     <div class="header-bar">
       <div class="title-group">
-        <h2>Rekap Perjalanan Dinas</h2>
+        <h2>Rekap Perjalanan Dinas - Dit Prodis Alkes</h2>
         <p>Klik nama pegawai untuk melihat rincian perjalanan • Klik judul kolom untuk mengurutkan</p>
       </div>
       <div class="header-actions">
@@ -723,7 +723,7 @@
           <span>⬇</span> Download XLSX
         </button>
         <button class="refresh-btn" onclick="fetchSheetData()">
-          <span>↻</span> Muat Ulang Data
+          <span>↻</span> Refresh Data
         </button>
       </div>
     </div>
@@ -741,7 +741,7 @@
         <select id="colDimension" onchange="resetSortAndRender()">
           <option value="helperMonth" selected>Bulan</option>
           <option value="lokus">Tujuan</option>
-          <option value="none">Total Saja</option>
+          <option value="none">Total saja</option>
         </select>
       </div>
 
@@ -769,7 +769,7 @@
                 <polyline points="1 5 4 8 11 1"></polyline>
               </svg>
             </span>
-            <span>UH (Rp)</span>
+            <span>UH</span>
           </label>
         </div>
 
@@ -781,7 +781,7 @@
                 <polyline points="1 5 4 8 11 1"></polyline>
               </svg>
             </span>
-            <span>Transport (Rp)</span>
+            <span>Transport</span>
           </label>
         </div>
 
@@ -832,7 +832,7 @@
       </div>
     </div>
 
-    <div id="status"><div class="spinner"></div><span>Memuat data spreadsheet...</span></div>
+    <div id="status"><div class="spinner"></div><span>Memuat data ...</span></div>
     <div class="table-wrapper" id="tableContainer" style="display:none;">
       <table id="pivotTable"></table>
     </div>
@@ -843,8 +843,8 @@
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalParticipantName">
       <div class="modal-header">
         <div class="modal-title">
-          <h3 id="modalParticipantName">Nama Peserta</h3>
-          <span id="modalParticipantNip">NIP: -</span>
+          <h3 id="modalParticipantName">Nama </h3>
+          <span id="modalParticipantNip">NIP : -</span>
         </div>
         <button class="modal-close" onclick="closeDetailModal()" title="Tutup">&times;</button>
       </div>
