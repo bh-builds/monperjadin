@@ -220,7 +220,7 @@
     /* 2-Column Controls Bar */
     .controls {
       display: grid;
-      grid-template-columns: minmax(220px, 290px) 1fr;
+      grid-template-columns: minmax(220px, 280px) 1fr;
       gap: 12px 20px;
       align-items: center;
       padding: 11px 14px;
@@ -266,7 +266,7 @@
       margin-right: 2px;
     }
 
-    select, input[type="text"] {
+    select, input[type="text"], input[type="date"] {
       padding: 6px 10px;
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-sm);
@@ -279,9 +279,21 @@
       transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    select:focus, input[type="text"]:focus {
+    select:focus, input[type="text"]:focus, input[type="date"]:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.14);
+    }
+
+    .period-badge {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-hover);
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
     }
 
     /* Search Box */
@@ -323,7 +335,85 @@
       color: var(--text-main);
     }
 
-    /* Calendar Grid */
+    /* Daily View Table */
+    .daily-wrapper {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .daily-header-banner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
+      background: var(--header-group-bg);
+      border-bottom: 1px solid var(--primary-border);
+    }
+
+    .daily-header-banner h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: #006b5f;
+    }
+
+    .daily-header-banner span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-hover);
+    }
+
+    .daily-table-scroll {
+      overflow-x: auto;
+    }
+
+    .daily-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    .daily-table th {
+      background: var(--header-bg);
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-align: left;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .daily-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .daily-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .daily-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .daily-table th.num, .daily-table td.num {
+      text-align: right;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .empty-state {
+      padding: 42px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Calendar Grid (Weekly & Monthly) */
     .calendar-wrapper {
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
@@ -362,6 +452,10 @@
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       grid-auto-rows: minmax(122px, auto);
+    }
+
+    .calendar-grid.weekly-mode {
+      grid-auto-rows: minmax(320px, auto);
     }
 
     .cal-day {
@@ -410,7 +504,8 @@
       font-size: 12px;
       font-weight: 600;
       color: var(--text-secondary);
-      width: 24px;
+      padding: 2px 6px;
+      min-width: 24px;
       height: 24px;
       display: inline-flex;
       align-items: center;
@@ -672,7 +767,7 @@
       color: var(--primary-hover);
     }
 
-    @media (max-width: 960px) {
+    @media (max-width: 1040px) {
       .controls {
         grid-template-columns: 1fr;
       }
@@ -698,7 +793,7 @@
           <h2>Kalender Perjalanan Dinas</h2>
           <span class="unit-tag">Dit Prodis Alkes</span>
         </div>
-        <p>Klik tanggal atau nama pegawai pada kalender untuk melihat rincian perjalanan dinas</p>
+        <p>Pilih tampilan harian, mingguan, atau bulanan untuk memantau jadwal perjalanan dinas pegawai</p>
       </div>
       <div class="header-actions">
         <button class="refresh-btn" onclick="fetchSheetData()">
@@ -711,21 +806,21 @@
       <div class="kpi-card">
         <div class="kpi-icon">👤</div>
         <div class="kpi-meta">
-          <span class="kpi-label">Pegawai Bertugas</span>
+          <span class="kpi-label" id="kpiParticipantsLabel">Pegawai Bertugas</span>
           <span class="kpi-value" id="kpiParticipants">0</span>
         </div>
       </div>
       <div class="kpi-card lime">
         <div class="kpi-icon">✈</div>
         <div class="kpi-meta">
-          <span class="kpi-label">Perjadin Bulan Ini</span>
+          <span class="kpi-label" id="kpiTripsLabel">Jumlah Perjadin</span>
           <span class="kpi-value" id="kpiTrips">0</span>
         </div>
       </div>
       <div class="kpi-card highlight">
         <div class="kpi-icon">Rp</div>
         <div class="kpi-meta">
-          <span class="kpi-label">Total Realisasi Bulan Ini</span>
+          <span class="kpi-label" id="kpiTotalLabel">Total Realisasi</span>
           <span class="kpi-value" id="kpiTotal">Rp 0</span>
         </div>
       </div>
@@ -741,11 +836,22 @@
         </div>
       </div>
 
-      <!-- Kolom Kanan: Filter Tujuan & Navigasi Bulan/Tahun -->
+      <!-- Kolom Kanan: Mode Tampilan, Filter Tujuan & Navigasi Periode -->
       <div class="controls-right">
         <div class="control-group">
+          <span class="control-label">Tampilan</span>
+          <select id="viewModeSelect" onchange="onViewModeChange()">
+            <option value="daily" selected>Harian (Daily)</option>
+            <option value="weekly">Mingguan (Weekly)</option>
+            <option value="monthly">Bulanan (Monthly)</option>
+          </select>
+        </div>
+
+        <div class="control-divider"></div>
+
+        <div class="control-group">
           <span class="control-label">Tujuan</span>
-          <select id="lokusFilter" onchange="renderCalendar()">
+          <select id="lokusFilter" onchange="renderView()">
             <option value="">Semua Tujuan</option>
           </select>
         </div>
@@ -754,16 +860,27 @@
 
         <div class="control-group">
           <span class="control-label">Periode</span>
-          <button class="nav-btn" onclick="changeMonth(-1)" title="Bulan Sebelumnya">‹</button>
-          <select id="monthSelect" onchange="onPeriodChange()"></select>
-          <select id="yearSelect" onchange="onPeriodChange()"></select>
-          <button class="nav-btn" onclick="changeMonth(1)" title="Bulan Berikutnya">›</button>
+          <button class="nav-btn" onclick="stepPeriod(-1)" title="Sebelumnya">‹</button>
+
+          <!-- Kontrol Tanggal (untuk Daily & Weekly) -->
+          <input type="date" id="datePicker" onchange="onDatePickerChange()">
+          <span class="period-badge" id="weekRangeBadge" style="display:none;">-</span>
+
+          <!-- Kontrol Bulan & Tahun (untuk Monthly) -->
+          <select id="monthSelect" onchange="onMonthYearChange()" style="display:none;"></select>
+          <select id="yearSelect" onchange="onMonthYearChange()" style="display:none;"></select>
+
+          <button class="nav-btn" onclick="stepPeriod(1)" title="Berikutnya">›</button>
         </div>
       </div>
     </div>
 
     <div id="status"><div class="spinner"></div><span>Memuat data kalender...</span></div>
 
+    <!-- Container Tampilan Harian (Daily) -->
+    <div class="daily-wrapper" id="dailyContainer" style="display:none;"></div>
+
+    <!-- Container Tampilan Mingguan & Bulanan (Weekly & Monthly) -->
     <div class="calendar-wrapper" id="calendarContainer" style="display:none;">
       <div class="calendar-weekdays">
         <div class="weekday-header">Senin</div>
@@ -778,7 +895,7 @@
     </div>
   </div>
 
-  <!-- Modal Rincian Tanggal / Pegawai -->
+  <!-- Modal Rincian Tanggal -->
   <div class="modal-backdrop" id="detailModal" onclick="handleBackdropClick(event)">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitleText">
       <div class="modal-header">
@@ -800,12 +917,16 @@
 
     let rawData = [];
     let parsedTrips = [];
-    let currentYear = new Date().getFullYear();
-    let currentMonth = new Date().getMonth(); // 0 - 11
+    let viewMode = 'daily'; // 'daily' | 'weekly' | 'monthly'
+    let activeDate = normalizeDate(new Date());
 
     const MONTHS_ID = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    const DAYS_ID = [
+      'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'
     ];
 
     const MONTH_EN_TO_IDX = {
@@ -826,19 +947,16 @@
       if (!str) return null;
       const s = String(str).trim();
 
-      // Format ISO: YYYY-MM-DD atau timestamp
       const isoMatch = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
       if (isoMatch) {
         return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
       }
 
-      // Format DD/MM/YYYY atau DD-MM-YYYY
       const dmyMatch = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
       if (dmyMatch) {
         return new Date(Number(dmyMatch[3]), Number(dmyMatch[2]) - 1, Number(dmyMatch[1]));
       }
 
-      // Format "12 Januari 2026" atau "12 Jan 2026"
       const textMatch = s.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
       if (textMatch) {
         const day = Number(textMatch[1]);
@@ -868,14 +986,27 @@
       return `${y}-${m}-${day}`;
     }
 
+    function formatIndoDate(d, includeDay = false) {
+      const base = `${d.getDate()} ${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
+      return includeDay ? `${DAYS_ID[d.getDay()]}, ${base}` : base;
+    }
+
+    function getMondayOfWeek(d) {
+      const day = d.getDay();
+      const diff = (day + 6) % 7; // Senin = 0, Minggu = 6
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate() - diff);
+    }
+
     async function fetchSheetData() {
       const statusEl = document.getElementById('status');
       const calContainer = document.getElementById('calendarContainer');
+      const dailyContainer = document.getElementById('dailyContainer');
       const kpiStrip = document.getElementById('kpiStrip');
 
       statusEl.style.display = 'flex';
       statusEl.innerHTML = '<div class="spinner"></div><span>Memuat data kalender...</span>';
       calContainer.style.display = 'none';
+      dailyContainer.style.display = 'none';
       kpiStrip.style.display = 'none';
 
       try {
@@ -889,9 +1020,8 @@
         prepareTripsAndControls();
 
         statusEl.style.display = 'none';
-        calContainer.style.display = 'block';
         kpiStrip.style.display = 'grid';
-        renderCalendar();
+        renderView();
       } catch (err) {
         statusEl.innerHTML = `<span style="color:#dc2626;">Gagal memuat data: ${err.message}. Pastikan Web App Apps Script sudah di-deploy dengan akses "Anyone".</span>`;
       }
@@ -930,77 +1060,121 @@
         };
       });
 
-      // Pilih periode default dari perjalanan terbaru yang tersedia jika bulan saat ini kosong
-      const validStarts = parsedTrips.filter(t => t.startDate).map(t => t.startDate);
-      if (validStarts.length > 0) {
-        const latest = new Date(Math.max(...validStarts.map(d => d.getTime())));
-        currentYear = latest.getFullYear();
-        currentMonth = latest.getMonth();
+      const today = normalizeDate(new Date());
+      const hasTodayTrips = parsedTrips.some(t => t.startDate && t.startDate <= today && t.endDate >= today);
+      if (!hasTodayTrips) {
+        const validStarts = parsedTrips.filter(t => t.startDate).map(t => t.startDate);
+        if (validStarts.length > 0) {
+          activeDate = new Date(Math.max(...validStarts.map(d => d.getTime())));
+        }
+      } else {
+        activeDate = today;
       }
 
-      // Isi dropdown Bulan
       const monthSelect = document.getElementById('monthSelect');
       monthSelect.innerHTML = MONTHS_ID.map((name, i) =>
-        `<option value="${i}" ${i === currentMonth ? 'selected' : ''}>${name}</option>`
+        `<option value="${i}" ${i === activeDate.getMonth() ? 'selected' : ''}>${name}</option>`
       ).join('');
 
-      // Isi dropdown Tahun
       const sortedYears = Array.from(yearsSet).sort((a, b) => a - b);
       const yearSelect = document.getElementById('yearSelect');
       yearSelect.innerHTML = sortedYears.map(y =>
-        `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`
+        `<option value="${y}" ${y === activeDate.getFullYear() ? 'selected' : ''}>${y}</option>`
       ).join('');
 
-      // Isi dropdown Tujuan (Lokus)
       const lokusSelect = document.getElementById('lokusFilter');
       const currentLokus = lokusSelect.value;
       const sortedLokus = Array.from(lokusSet).sort();
       lokusSelect.innerHTML = '<option value="">Semua Tujuan</option>' +
         sortedLokus.map(l => `<option value="${escapeHtml(l)}" ${l === currentLokus ? 'selected' : ''}>${escapeHtml(l)}</option>`).join('');
+
+      syncPeriodControls();
+    }
+
+    function syncPeriodControls() {
+      const datePicker = document.getElementById('datePicker');
+      const weekRangeBadge = document.getElementById('weekRangeBadge');
+      const monthSelect = document.getElementById('monthSelect');
+      const yearSelect = document.getElementById('yearSelect');
+
+      datePicker.value = dateToKey(activeDate);
+
+      if (!Array.from(yearSelect.options).some(o => Number(o.value) === activeDate.getFullYear())) {
+        const opt = document.createElement('option');
+        opt.value = activeDate.getFullYear();
+        opt.textContent = activeDate.getFullYear();
+        yearSelect.appendChild(opt);
+      }
+      monthSelect.value = activeDate.getMonth();
+      yearSelect.value = activeDate.getFullYear();
+
+      if (viewMode === 'daily') {
+        datePicker.style.display = 'inline-block';
+        weekRangeBadge.style.display = 'none';
+        monthSelect.style.display = 'none';
+        yearSelect.style.display = 'none';
+      } else if (viewMode === 'weekly') {
+        datePicker.style.display = 'inline-block';
+        weekRangeBadge.style.display = 'inline-block';
+        monthSelect.style.display = 'none';
+        yearSelect.style.display = 'none';
+
+        const mon = getMondayOfWeek(activeDate);
+        const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+        weekRangeBadge.textContent = `${mon.getDate()} ${MONTHS_ID[mon.getMonth()].slice(0, 3)} – ${sun.getDate()} ${MONTHS_ID[sun.getMonth()].slice(0, 3)} ${sun.getFullYear()}`;
+      } else {
+        datePicker.style.display = 'none';
+        weekRangeBadge.style.display = 'none';
+        monthSelect.style.display = 'inline-block';
+        yearSelect.style.display = 'inline-block';
+      }
+    }
+
+    function onViewModeChange() {
+      viewMode = document.getElementById('viewModeSelect').value;
+      syncPeriodControls();
+      renderView();
+    }
+
+    function onDatePickerChange() {
+      const val = document.getElementById('datePicker').value;
+      if (!val) return;
+      const [y, m, d] = val.split('-').map(Number);
+      activeDate = new Date(y, m - 1, d);
+      syncPeriodControls();
+      renderView();
+    }
+
+    function onMonthYearChange() {
+      const m = Number(document.getElementById('monthSelect').value);
+      const y = Number(document.getElementById('yearSelect').value);
+      activeDate = new Date(y, m, 1);
+      syncPeriodControls();
+      renderView();
+    }
+
+    function stepPeriod(delta) {
+      if (viewMode === 'daily') {
+        activeDate = new Date(activeDate.getFullYear(), activeDate.getMonth(), activeDate.getDate() + delta);
+      } else if (viewMode === 'weekly') {
+        activeDate = new Date(activeDate.getFullYear(), activeDate.getMonth(), activeDate.getDate() + (delta * 7));
+      } else {
+        activeDate = new Date(activeDate.getFullYear(), activeDate.getMonth() + delta, 1);
+      }
+      syncPeriodControls();
+      renderView();
     }
 
     function handleSearch() {
       const val = document.getElementById('searchInput').value;
       document.getElementById('clearSearchBtn').style.display = val ? 'block' : 'none';
-      renderCalendar();
+      renderView();
     }
 
     function clearSearch() {
       document.getElementById('searchInput').value = '';
       document.getElementById('clearSearchBtn').style.display = 'none';
-      renderCalendar();
-    }
-
-    function onPeriodChange() {
-      currentMonth = Number(document.getElementById('monthSelect').value);
-      currentYear = Number(document.getElementById('yearSelect').value);
-      renderCalendar();
-    }
-
-    function changeMonth(delta) {
-      let newMonth = currentMonth + delta;
-      let newYear = currentYear;
-      if (newMonth < 0) {
-        newMonth = 11;
-        newYear -= 1;
-      } else if (newMonth > 11) {
-        newMonth = 0;
-        newYear += 1;
-      }
-
-      const yearSelect = document.getElementById('yearSelect');
-      if (!Array.from(yearSelect.options).some(o => Number(o.value) === newYear)) {
-        const opt = document.createElement('option');
-        opt.value = newYear;
-        opt.textContent = newYear;
-        yearSelect.appendChild(opt);
-      }
-
-      currentMonth = newMonth;
-      currentYear = newYear;
-      document.getElementById('monthSelect').value = currentMonth;
-      yearSelect.value = currentYear;
-      renderCalendar();
+      renderView();
     }
 
     function escapeHtml(str) {
@@ -1034,39 +1208,143 @@
       });
     }
 
-    function renderCalendar() {
-      const filtered = getFilteredTrips();
+    function updateKpiStrip(trips, periodText) {
+      const uniqueParticipants = new Set(trips.map(t => t.nama));
+      const totalBiaya = trips.reduce((sum, t) => sum + (Number(t.total) || 0), 0);
 
-      const monthStart = new Date(currentYear, currentMonth, 1);
-      const monthEnd = new Date(currentYear, currentMonth + 1, 0);
-
-      // Perjalanan yang bersinggungan dengan bulan aktif
-      const monthTrips = filtered.filter(t => t.startDate <= monthEnd && t.endDate >= monthStart);
-
-      // Hitung KPI Bulan Aktif
-      const uniqueParticipants = new Set(monthTrips.map(t => t.nama));
-      const totalBiaya = monthTrips.reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+      document.getElementById('kpiParticipantsLabel').textContent = `Pegawai (${periodText})`;
+      document.getElementById('kpiTripsLabel').textContent = `Perjadin (${periodText})`;
+      document.getElementById('kpiTotalLabel').textContent = `Realisasi (${periodText})`;
 
       document.getElementById('kpiParticipants').textContent = uniqueParticipants.size.toLocaleString('id-ID');
-      document.getElementById('kpiTrips').textContent = monthTrips.length.toLocaleString('id-ID');
+      document.getElementById('kpiTrips').textContent = trips.length.toLocaleString('id-ID');
       document.getElementById('kpiTotal').textContent = 'Rp ' + totalBiaya.toLocaleString('id-ID');
+    }
 
-      // Hitung sel kalender (Senin sebagai hari pertama)
-      const firstWeekday = (monthStart.getDay() + 6) % 7; // 0 = Senin, 6 = Minggu
-      const gridStart = new Date(currentYear, currentMonth, 1 - firstWeekday);
+    function renderView() {
+      const filtered = getFilteredTrips();
+      const dailyContainer = document.getElementById('dailyContainer');
+      const calContainer = document.getElementById('calendarContainer');
 
-      const totalDaysInMonth = monthEnd.getDate();
-      const totalCells = Math.ceil((firstWeekday + totalDaysInMonth) / 7) * 7;
+      if (viewMode === 'daily') {
+        calContainer.style.display = 'none';
+        dailyContainer.style.display = 'block';
+        renderDailyView(filtered);
+      } else {
+        dailyContainer.style.display = 'none';
+        calContainer.style.display = 'block';
+        renderGridCalendar(filtered);
+      }
+    }
 
-      const todayKey = dateToKey(new Date());
+    function renderDailyView(filtered) {
+      const dayTrips = filtered
+        .filter(t => t.startDate <= activeDate && t.endDate >= activeDate)
+        .sort((a, b) => a.nama.localeCompare(b.nama));
+
+      updateKpiStrip(dayTrips, 'Harian');
+
+      const container = document.getElementById('dailyContainer');
+      const dateTitle = formatIndoDate(activeDate, true);
+
+      let html = `
+        <div class="daily-header-banner">
+          <h3>📅 ${escapeHtml(dateTitle)}</h3>
+          <span>${dayTrips.length} Pegawai Sedang Perjalanan Dinas</span>
+        </div>
+      `;
+
+      if (dayTrips.length === 0) {
+        html += `<div class="empty-state">Tidak ada jadwal perjalanan dinas pada tanggal <strong>${escapeHtml(dateTitle)}</strong>.</div>`;
+        container.innerHTML = html;
+        return;
+      }
+
+      html += `
+        <div class="daily-table-scroll">
+          <table class="daily-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Pegawai</th>
+                <th>NIP</th>
+                <th>Tujuan</th>
+                <th>Berangkat</th>
+                <th>Pulang</th>
+                <th class="num">Durasi</th>
+                <th class="num">UH (Rp)</th>
+                <th class="num">Transport (Rp)</th>
+                <th class="num">Penginapan 30%</th>
+                <th class="num">Total (Rp)</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      dayTrips.forEach((t, idx) => {
+        html += `
+          <tr>
+            <td>${idx + 1}</td>
+            <td style="font-weight:600; color:#0f172a;">${escapeHtml(t.nama)}</td>
+            <td style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#64748b;">${escapeHtml(t.nip || '-')}</td>
+            <td><span class="lokus-badge">${escapeHtml(t.lokus)}</span></td>
+            <td>${escapeHtml(t.berangkat)}</td>
+            <td>${escapeHtml(t.pulang)}</td>
+            <td class="num">${formatNumber(t.durasi)} hr</td>
+            <td class="num">${formatNumber(t.uh)}</td>
+            <td class="num">${formatNumber(t.transport)}</td>
+            <td class="num">${formatNumber(t.penginapan)}</td>
+            <td class="num" style="font-weight:600;">${formatNumber(t.total)}</td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table></div>`;
+      container.innerHTML = html;
+    }
+
+    function renderGridCalendar(filtered) {
       const gridEl = document.getElementById('calendarGrid');
-      let html = '';
+      const todayKey = dateToKey(new Date());
 
+      let gridStart;
+      let totalCells;
+      let rangeStart;
+      let rangeEnd;
+      let maxVisibleChips;
+
+      if (viewMode === 'weekly') {
+        gridEl.classList.add('weekly-mode');
+        gridStart = getMondayOfWeek(activeDate);
+        totalCells = 7;
+        rangeStart = gridStart;
+        rangeEnd = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + 6);
+        maxVisibleChips = 12;
+
+        const periodTrips = filtered.filter(t => t.startDate <= rangeEnd && t.endDate >= rangeStart);
+        updateKpiStrip(periodTrips, 'Mingguan');
+      } else {
+        gridEl.classList.remove('weekly-mode');
+        const year = activeDate.getFullYear();
+        const month = activeDate.getMonth();
+        rangeStart = new Date(year, month, 1);
+        rangeEnd = new Date(year, month + 1, 0);
+
+        const firstWeekday = (rangeStart.getDay() + 6) % 7;
+        gridStart = new Date(year, month, 1 - firstWeekday);
+        totalCells = Math.ceil((firstWeekday + rangeEnd.getDate()) / 7) * 7;
+        maxVisibleChips = 3;
+
+        const periodTrips = filtered.filter(t => t.startDate <= rangeEnd && t.endDate >= rangeStart);
+        updateKpiStrip(periodTrips, 'Bulanan');
+      }
+
+      let html = '';
       for (let i = 0; i < totalCells; i++) {
         const cellDate = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
         const cellKey = dateToKey(cellDate);
-        const isOtherMonth = cellDate.getMonth() !== currentMonth;
-        const dayOfWeek = cellDate.getDay(); // 0 = Minggu, 6 = Sabtu
+        const isOtherMonth = viewMode === 'monthly' && cellDate.getMonth() !== activeDate.getMonth();
+        const dayOfWeek = cellDate.getDay();
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
         const isToday = cellKey === todayKey;
 
@@ -1079,13 +1357,16 @@
         if (isWeekend) classes.push('weekend');
         if (isToday) classes.push('today');
 
-        const MAX_VISIBLE = 3;
-        const visibleTrips = dayTrips.slice(0, MAX_VISIBLE);
+        const visibleTrips = dayTrips.slice(0, maxVisibleChips);
         const hiddenCount = dayTrips.length - visibleTrips.length;
+
+        const dayLabel = viewMode === 'weekly'
+          ? `${cellDate.getDate()} ${MONTHS_ID[cellDate.getMonth()].slice(0, 3)}`
+          : `${cellDate.getDate()}`;
 
         html += `<div class="${classes.join(' ')}" onclick="openDayModal('${cellKey}')">`;
         html += `<div class="cal-day-top">
-                   <span class="day-num">${cellDate.getDate()}</span>
+                   <span class="day-num">${dayLabel}</span>
                    ${dayTrips.length > 0 ? `<span class="day-count-badge">${dayTrips.length}</span>` : ''}
                  </div>`;
 
@@ -1114,7 +1395,7 @@
 
       if (dayTrips.length === 0) return;
 
-      const formattedDate = `${d} ${MONTHS_ID[m - 1]} ${y}`;
+      const formattedDate = formatIndoDate(targetDate, true);
       document.getElementById('modalTitleText').textContent = `Jadwal Perjalanan Dinas — ${formattedDate}`;
       document.getElementById('modalSubtitleText').textContent = `${dayTrips.length} pegawai sedang melaksanakan perjalanan dinas`;
 
